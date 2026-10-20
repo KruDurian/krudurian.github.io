@@ -3,37 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บล็อกใหม่ของ KruDurian - ย้ายบ้านจาก Blogspot</title>
-    <meta name="description" content="บล็อกแชร์เรื่องราวและทดสอบระบบ JavaScript บน GitHub Pages ของครูทุเรียน">
+    <title>คลังเกมเพื่อการศึกษา - KruDurian</title>
+    <meta name="description" content="รวมสื่อและเกมเพื่อการศึกษา แยกรายวิชาและระดับชั้น ป.1 - ป.6 โดยครูทุเรียน">
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f6f8; color: #333; }
+        header { text-align: center; padding: 30px; background: #e2f0d9; border-bottom: 3px solid #385723; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .intro-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        
+        /* โครงสร้างกล่องระดับชั้น */
+        .grade-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 35px; border-top: 5px solid #385723; }
+        .grade-title { margin-top: 0; color: #1b5e20; font-size: 1.6rem; font-weight: bold; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* จัดกลุ่มวิชาข้างในระดับชั้น */
+        .subject-group { margin-bottom: 20px; }
+        .subject-label { font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; color: #555; }
+        .game-list { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
+        
+        /* 🎨 สไตล์ปุ่มแยกตามสีประจำวิชา (ครูสามารถ Copy ชื่อคลาสไปใช้ได้เลย) */
+        .btn-math { background-color: #2e7d32; color: white; } /* คณิตศาสตร์ = สีเขียว */
+        .btn-math:hover { background-color: #1b5e20; }
+        
+        .btn-sci { background-color: #0288d1; color: white; } /* วิทยาศาสตร์ = สีฟ้า */
+        .btn-sci:hover { background-color: #01579b; }
+        
+        .btn-thai { background-color: #e65100; color: white; } /* ภาษาไทย = สีส้ม */
+        .btn-thai:hover { background-color: #b33c00; }
+        
+        .btn-eng { background-color: #6a1b9a; color: white; } /* ภาษาอังกฤษ = สีม่วง */
+        .btn-eng:hover { background-color: #4a148c; }
+        
+        /* สไตล์พื้นฐานของปุ่มกด */
+        .btn-game { display: inline-block; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 8px; box-shadow: 0 3px 5px rgba(0,0,0,0.1); transition: 0.2s; }
+        .btn-game:hover { transform: translateY(-2px); }
+        
+        /* กล่องว่างรอเพิ่มเกม */
+        .placeholder-game { display: inline-block; padding: 10px 20px; background-color: #f9f9f9; color: #aaa; border: 2px dashed #ddd; border-radius: 8px; font-style: italic; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
 
-    <header style="text-align: center; padding: 30px; background: #e2f0d9; border-bottom: 3px solid #385723;">
-        <h1>ยินดีต้อนรับสู่บล็อกใหม่บน GitHub Pages ของ KruDurian! 🏆</h1>
+    <header>
+        <h1>🏆 คลังเกมเพื่อการศึกษาของ KruDurian </h1>
     </header>
-<!-- ปุ่มลิงก์เชื่อมไปยังหน้าเกมจับคู่ -->
-<div style="text-align: center; margin-top: 40px;">
-    <a href="game-matching.html" style="display: inline-block; padding: 15px 30px; background-color: #2e7d32; color: white; text-decoration: none; font-size: 1.2rem; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        🎮 คลิกที่นี่เพื่อเล่นเกมจับคู่การชั่งน้ำหนัก ป.1
-    </a>
-</div>
 
-    <main style="max-width: 800px; margin: 30px auto; padding: 0 20px; font-family: sans-serif; line-height: 1.6;">
-        <article>
-            <h2>บล็อกนี้รองรับ HTML และ JavaScript 100%</h2>
-            <p>นี่คือเนื้อหาทดสอบภาษาไทย ระบบนี้โหลดเร็วมาก โครงสร้างสะอาด และไม่มีปัญหา Redirect Error กวนใจแน่นอนครับ</p>
+    <div class="container">
+        
+        <div class="intro-box">
+            <h2>ยินดีต้อนรับสู่แหล่งเรียนรู้ยุคใหม่</h2>
+            <p>รวมสื่อการสอนและเกมแยกตามกลุ่มสาระการเรียนรู้ ระดับชั้นประถมศึกษา ป.1 - ป.6 โหลดเร็ว เป็นระบบ และค้นหาง่ายบน Google</p>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 1 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 1</div>
             
-            <!-- ส่วนทดสอบสคริปต์ JavaScript -->
-            <div id="js-test-box" style="padding: 20px; background: #fff2cc; border: 1px solid #d6b656; border-radius: 5px; margin-top: 20px;">
-                กำลังโหลดระบบสคริปต์...
+            <!-- กลุ่มวิชาคณิตศาสตร์ -->
+            <div class="subject-group">
+                <div class="subject-label">➕ วิชาคณิตศาสตร์ (ปุ่มสีเขียว)</div>
+                <div class="game-list">
+                    <a href="game-matching.html" class="btn-game btn-math">🎮 เกมจับคู่การชั่งน้ำหนัก ป.1</a>
+                    <div class="placeholder-game">➕ เพิ่มเกมคณิตเพิ่มตรงนี้...</div>
+                </div>
             </div>
 
-            <script>
-                // สคริปต์จะทำงานทันทีเมื่อเปิดหน้าเว็บ
-                document.getElementById('js-test-box').innerHTML = "<b>🔥 ข้อความนี้เขียนด้วย JavaScriptสำเร็จแล้ว!</b> สคริปต์ทำงานได้อิสระ 100% ไม่มีระบบแพลตฟอร์มมาบล็อกหรือจำกัดโค้ดของคุณอีกต่อไปครับ";
-            </script>
-        </article>
-    </main>
+            <!-- กลุ่มวิชาวิทยาศาสตร์ -->
+            <div class="subject-group">
+                <div class="subject-label">🧪 วิชาวิทยาศาสตร์ (ปุ่มสีฟ้า)</div>
+                <div class="game-list">
+                    <div class="placeholder-game">➕ รอเพิ่มเกมวิทยาศาสตร์...</div>
+                </div>
+            </div>
+
+            <!-- กลุ่มวิชาภาษาไทย -->
+            <div class="subject-group">
+                <div class="subject-label">📖 วิชาภาษาไทย (ปุ่มสีส้ม)</div>
+                <div class="game-list">
+                    <div class="placeholder-game">➕ รอเพิ่มเกมภาษาไทย...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 2 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 2</div>
+            
+            <div class="subject-group">
+                <div class="subject-label">➕ วิชาคณิตศาสตร์</div>
+                <div class="game-list">
+                    <div class="placeholder-game">➕ รอเพิ่มเกมคณิตศาสตร์...</div>
+                </div>
+            </div>
+
+            <div class="subject-group">
+                <div class="subject-label">🧪 วิชาวิทยาศาสตร์</div>
+                <div class="game-list">
+                    <div class="placeholder-game">➕ รอเพิ่มเกมวิทยาศาสตร์...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 3 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 3</div>
+            <div class="subject-group">
+                <div class="game-list"><div class="placeholder-game">➕ กำลังพัฒนาหลักสูตร ป.3...</div></div>
+            </div>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 4 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 4</div>
+            <div class="subject-group">
+                <div class="game-list"><div class="placeholder-game">➕ กำลังพัฒนาหลักสูตร ป.4...</div></div>
+            </div>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 5 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 5</div>
+            <div class="subject-group">
+                <div class="game-list"><div class="placeholder-game">➕ กำลังพัฒนาหลักสูตร ป.5...</div></div>
+            </div>
+        </div>
+
+        <!-- ==================== ชั้น ประถมศึกษาปีที่ 6 ==================== -->
+        <div class="grade-section">
+            <div class="grade-title">🎒 ชั้นประถมศึกษาปีที่ 6</div>
+            <div class="subject-group">
+                <div class="game-list"><div class="placeholder-game">➕ กำลังพัฒนาหลักสูตร ป.6...</div></div>
+            </div>
+        </div>
+
+    </div>
 
 </body>
 </html>
+<a href="ชื่อไฟล์.html" class="btn-game btn-sci">🎮 ชื่อเกม</a>
+<a href="ชื่อไฟล์.html" class="btn-game btn-thai">🎮 ชื่อเกม</a>
+<a href="ชื่อไฟล์.html" class="btn-game btn-eng">🎮 ชื่อเกม</a>
