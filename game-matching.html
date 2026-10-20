@@ -248,14 +248,21 @@
         const x2 = rightRect.left - gameAreaRect.left;
         const y2 = rightRect.top + (rightRect.height / 2) - gameAreaRect.top;
 
-        const line = document.createElementNS("http://w3.org", "line");
+               // แก้ไขบรรทัดที่ 251 เป็นต้นไป ให้ใช้สคริปต์สมบูรณ์ชุดนี้ครับ
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", x1);
         line.setAttribute("y1", y1);
         line.setAttribute("x2", x2);
         line.setAttribute("y2", y2);
         line.setAttribute("class", "connection-line");
         
+        // 🎨 จุดสำคัญ 1: ใส่สีสันและความหนาให้เส้น (หากไม่มีคำสั่งนี้ เส้นจะโปร่งใส)
+        line.setAttribute("stroke", "#2e7d32"); // เส้นสีเขียวเข้ม (หรือครูเปลี่ยนโค้ดสีตามชอบได้ครับ)
+        line.setAttribute("stroke-width", "4");  // ความหนาของเส้น 4 พิกเซล
+        
+        // 🚀 จุดสำคัญ 2: สั่งให้เส้นไปโชว์ในกรอบ svg หลักของเกม
         svg.appendChild(line);
+
     }
 
     function checkMatch() {
