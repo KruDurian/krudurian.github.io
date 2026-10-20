@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกม Number Family (ส่วนย่อย-ส่วนรวม) - KruDurian</title>
+    <meta name="description" content="เกมคณิตศาสตร์เรื่องความสัมพันธ์ส่วนย่อย ส่วนรวม (Number Family) สำหรับนักเรียนระดับประถมศึกษา">
+     
+     
+         <style>
+        body { font-family: sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; text-align: center; user-select: none; }
+        .game-container { max-width: 600px; margin: 20px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        h1 { color: #2e7d32; margin-bottom: 10px; font-size: 1.8rem; }
+        .instructions { color: #555; font-size: 1.1rem; margin-bottom: 25px; }
+        
+        /* 📐 ขนาดพื้นที่แผนภาพ */
+        .diagram-container { position: relative; width: 300px; height: 260px; margin: 0 auto 30px auto; }
+        
+        /* 🔴 วงกลมส่วนรวม (Whole) อยู่บนสุดตรงกลาง - วงกลมเต็มวง */
+        .slot-whole { width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; position: absolute; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); transition: background-color 0.2s; z-index: 2; background-color: #ffebee; border: 4px dashed #c62828; left: 110px; top: 10px; color: #c62828; }
+        
+        /* 🌗 ส่วนย่อย 1 (ซ้ายล่าง) - ครึ่งวงกลมแนวตั้ง ทรงตัว D (หันโค้งไปทางขวา) */
+        .slot-part1 { 
+            width: 45px; 
+            height: 90px; 
+            border-radius: 0 90px 90px 0; /* ทำทรงตัว D หันโค้งขวา */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding-right: 10px;
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            position: absolute; 
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); 
+            transition: background-color 0.2s; 
+            z-index: 2; 
+            background-color: #e8f5e9; 
+            border: 4px dashed #2e7d32; 
+            border-left: none; /* เปิดขอบตรงด้านซ้าย */
+            left: 35px; 
+            bottom: 15px; 
+            color: #2e7d32; 
+        }
+        
+        /* 🌗 ส่วนย่อย 2 (ขวาล่าง) - ครึ่งวงกลมแนวตั้ง ทรงตัว D เหมือนกัน (หันโค้งไปทางขวา) */
+        .slot-part2 { 
+            width: 45px; 
+            height: 90px; 
+            border-radius: 0 90px 90px 0; /* ทำทรงตัว D หันโค้งขวา */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding-right: 10px;
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            position: absolute; 
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); 
+            transition: background-color 0.2s; 
+            z-index: 2; 
+            background-color: #e8f5e9; 
+            border: 4px dashed #2e7d32; 
+            border-left: none; /* เปิดขอบตรงด้านซ้าย */
+            right: 35px; 
+            bottom: 15px; 
+            color: #2e7d32; 
+        }
+        
+        /* สัญลักษณ์กำกับประเภทรูปทรง */
+        .slot-whole::after { content: "ส่วนรวม"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #c62828; font-weight: normal; left: 0; right: 0; text-align: center; }
+        .slot-part1::after, .slot-part2::after { content: "ส่วนย่อย"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #2e7d32; font-weight: normal; left: 0; right: 0; text-align: center; }
+
+        /* 📐 เส้นเชื่อมความสัมพันธ์เฉียงลงด้านล่าง */
+        .line { position: absolute; background-color: #b0bec5; z-index: 1; width: 4px; height: 115px; top: 80px; transform-origin: top center; }
+        .line-top { left: 148px; transform: rotate(32deg); }      
+        .line-bottom { right: 148px; transform: rotate(-32deg); }  
+
+        /* กองตัวเลขที่ให้เลือกลาก */
+        .number-pool { display: flex; justify-content: center; gap: 20px; margin-top: 40px; min-height: 75px; padding: 10px; background: #f9f9f9; border-radius: 12px; border: 1px dashed #ccc; }
+        .number-card { width: 65px; height: 65px; background-color: #2196f3; color: white; border-radius: 12px; font-size: 1.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.15); touch-action: none; z-index: 10; }
+        .number-card:active { cursor: grabbing; }
+
+        /* ปุ่มและส่วนแสดงสถานะ */
+        .btn-check { display: inline-block; padding: 12px 30px; background-color: #4caf50; color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-check:hover { background-color: #43a047; }
+        .result-message { font-size: 1.3rem; font-weight: bold; margin-top: 15px; min-height: 30px; }
+        .score-board { font-size: 1.1rem; margin-top: 10px; color: #666; }
+    </style>
+
+    
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🔢 เกม Number Family (ส่วนย่อย-ส่วนรวม)</h1>
+        <p class="instructions">คำชี้แจง: ลากตัวเลขด้านล่างไปใส่ในวงกลม เพื่อสร้างความสัมพันธ์ที่ถูกต้อง (ส่วนย่อย + ส่วนย่อย = ส่วนรวม)</p>
+        
+        <div class="diagram-container">
+            <!-- เส้นเชื่อมแผนภาพ -->
+            <div class="line line-top"></div>
+            <div class="line line-bottom"></div>
+            
+            <!-- ช่องวางตัวเลข -->
+            <div class="circle-slot slot-whole" id="whole" data-slot="whole"></div>
+            <div class="circle-slot slot-part1" id="part1" data-slot="part"></div>
+            <div class="circle-slot slot-part2" id="part2" data-slot="part"></div>
+        </div>
+
+        <!-- กองตัวเลขเริ่มต้น -->
+        <div class="number-pool" id="pool"></div>
+
+      
+        <div class="result-message" id="result"></div>
+        <div class="score-board" id="score">คะแนน: 0 | ข้อที่: 1</div>
+    </div>
+    <!-- โค้ดควบคุมระบบเกมและ Drag & Drop บนมือถือ -->
+       <script>
+        // ชุดโจทย์ตัวเลขสัมพัทธ์ (Whole, Part1, Part2)
+        const questions = [
+            { whole: 10, part1: 7, part2: 3 },
+            { whole: 8, part1: 5, part2: 3 },
+            { whole: 15, part1: 10, part2: 5 },
+            { whole: 12, part1: 8, part2: 4 },
+            { whole: 20, part1: 11, part2: 9 }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let activeCard = null;
+
+        // เริ่มต้นเกม
+        function initGame() {
+            document.getElementById('result').innerHTML = "";
+            
+            // ล้างข้อมูลในช่องวางเดิม
+            const slots = document.querySelectorAll('.circle-slot');
+            slots.forEach(slot => slot.innerHTML = "");
+
+            const q = questions[currentLevel];
+            document.getElementById('score').innerText = `คะแนน: ${score} | ข้อที่: ${currentLevel + 1} / ${questions.length}`;
+
+            // นำตัวเลขมาสลับตำแหน่งไม่ให้เรียงคำตอบ
+            const numbers = [q.whole, q.part1, q.part2].sort(() => Math.random() - 0.5);
+            const pool = document.getElementById('pool');
+            pool.innerHTML = "";
+
+            numbers.forEach((num, index) => {
+                const card = document.createElement('div');
+                card.className = 'number-card';
+                card.innerText = num;
+                card.id = 'card-' + index;
+                card.setAttribute('draggable', 'true');
+                
+                // ระบบ Drag events สำหรับคอมพิวเตอร์
+                card.addEventListener('dragstart', dragStart);
+                
+                // ระบบ Touch events สำหรับมือถือ/แท็บเล็ต
+                card.addEventListener('touchstart', touchStart, {passive: false});
+                card.addEventListener('touchmove', touchMove, {passive: false});
+                card.addEventListener('touchend', touchEnd);
+
+                pool.appendChild(card);
+            });
+        }
+
+        // --- ระบบคำสั่งเคลื่อนย้ายบน PC (Drag & Drop) ---
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        }
+
+        const slots = document.querySelectorAll('.circle-slot');
+        slots.forEach(slot => {
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('drop', e => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('text');
+                const card = document.getElementById(id);
+                if(slot.children.length === 0) {
+                    slot.appendChild(card);
+                    updateRealTimeSummary(); // เรียกทำงานทันทีที่วางตัวเลขลงช่อง
+                }
+            });
+        });
+
+        document.getElementById('pool').addEventListener('dragover', e => e.preventDefault());
+        document.getElementById('pool').addEventListener('drop', e => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text');
+            const card = document.getElementById(id);
+            document.getElementById('pool').appendChild(card);
+            updateRealTimeSummary(); // ตรวจสอบและอัปเดตแบบเรียลไทม์
+        });
+
+        // --- ระบบคำสั่งเคลื่อนย้ายบนมือถือ (Touch Events) ---
+        function touchStart(e) {
+            activeCard = e.target;
+            activeCard.style.position = 'absolute';
+            moveAt(e.touches.pageX, e.touches.pageY);
+        }
+
+        function touchMove(e) {
+            e.preventDefault();
+            if (!activeCard) return;
+            moveAt(e.touches.pageX, e.touches.pageY);
+        }
+
+        function moveAt(pageX, pageY) {
+            activeCard.style.left = pageX - activeCard.offsetWidth / 2 + 'px';
+            activeCard.style.top = pageY - activeCard.offsetHeight / 2 + 'px';
+        }
+
+        function touchEnd(e) {
+            if (!activeCard) return;
+            activeCard.style.position = 'static';
+            
+            const touch = e.changedTouches;
+            activeCard.style.display = 'none'; 
+            const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            activeCard.style.display = 'flex';
+
+            if (elemBelow) {
+                const slot = elemBelow.closest('.circle-slot') || elemBelow.closest('#pool');
+                if (slot && (slot.id === 'pool' || slot.children.length === 0)) {
+                    slot.appendChild(activeCard);
+                }
+            }
+            activeCard = null;
+            updateRealTimeSummary(); // เรียกทำงานทันทีที่วางตัวเลขลงช่องบนมือถือ
+        }
+
+        // --- 📊 ตรวจสอบตำแหน่งตัวเลขและสรุปผลเรียลไทม์ ---
+        function updateRealTimeSummary() {
+            const wholeSlot = document.getElementById('whole').firstElementChild;
+            const part1Slot = document.getElementById('part1').firstElementChild;
+            const part2Slot = document.getElementById('part2').firstElementChild;
+
+            // ถ้าลากใส่ยังไม่ครบ 3 ช่อง ให้ล้างพื้นที่แสดงผลรอไว้ก่อน
+            if (!wholeSlot || !part1Slot || !part2Slot) {
+                document.getElementById('result').innerHTML = "";
+                return;
+            }
+
+            const wVal = parseInt(wholeSlot.innerText);
+            const p1Val = parseInt(part1Slot.innerText);
+            const p2Val = parseInt(part2Slot.innerText);
+
+            // เงื่อนไขคำตอบถูกต้อง: ส่วนย่อยสองช่องบวกกันต้องเท่ากับส่วนรวม
+            if (p1Val + p2Val === wVal) {
+                document.getElementById('result').innerHTML = `
+                    <div style="text-align: left; background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px solid #2e7d32; font-size: 1.1rem; line-height: 1.8;">
+                        <b style="color: #2e7d32; font-size: 1.3rem;">🎉 วางตัวเลขได้ถูกต้อง! มาดูประโยคสัญลักษณ์กัน:</b><br>
+                        🔹 <b>ครึ่งวงกลม + ครึ่งวงกลม = วงกลม</b> (ส่วนย่อย + ส่วนย่อย = ส่วนรวม)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;1) ${p1Val} + ${p2Val} = ${wVal}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;2) ${p2Val} + ${p1Val} = ${wVal}<br>
+                        🔹 <b>วงกลม - ครึ่งวงกลม = ครึ่งวงกลม</b> (ส่วนรวม - ส่วนย่อย = ส่วนย่อย)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;3) ${wVal} - ${p1Val} = ${p2Val}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;4) ${wVal} - ${p2Val} = ${p1Val}
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button id="next-btn" onclick="nextQuestion()" style="padding: 10px 25px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">ทำข้อถัดไป ➡️</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // หากลากตัวเลขใส่ครบ แต่ความสัมพันธ์ผิด
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px solid #c62828; font-weight: bold; font-size: 1.1rem;">
+                        ❌ ตัวเลขยังไม่สัมพันธ์กันนะจ๊ะ! (ส่วนย่อยบวกกันต้องเท่ากับส่วนรวม) ลองสลับตำแหน่งดูอีกทีนะ
+                    </div>
+                `;
+            }
+        }
+
+        // --- ปุ่มกดไปข้อถัดไปแบบคุมเวลาเอง ---
+        function nextQuestion() {
+            score += 10;
+            currentLevel++;
+            if (currentLevel < questions.length) {
+                initGame();
+            } else {
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 12px; border: 2px solid #ffeeba;">
+                        <h3 style="color: #856404; margin: 0 0 10px 0;">🏆 ยอดเยี่ยมมาก จบเกมแล้ว!</h3>
+                        <p style="margin: 0; font-size: 1.2rem;">คุณครูได้คะแนนรวมทั้งหมด <b>${score}</b> คะแนนเต็ม!</p>
+                    </div>
+                `;
+                document.getElementById('pool').innerHTML = "<b>เก่งมากๆ เลยเด็กๆ! ไว้มาเล่นกันใหม่นะ 😊</b>";
+            }
+        }
+
+        // เริ่มเกมครั้งแรกเมื่อเปิดหน้าเว็บ
+        window.onload = initGame;
+    </script>
+
+</body>
+</html>
