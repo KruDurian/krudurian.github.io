@@ -1,0 +1,431 @@
+<div class="frog-game-container">
+    <!-- ส่วนหัวเกม -->
+    <div class="game-header">
+        <h2>🪷 เกมเจ้ากบกระโดดข้ามใบบัว 🐸</h2>
+        <p>ฝึกทักษะการเรียงลำดับตัวเลข (น้อยไปมาก หรือ มากไปน้อย)</p>
+    </div>
+
+    <!-- ฉากการเดินทาง (Visual Map ในสระน้ำ) -->
+    <div class="game-scene">
+        <div class="path-grid" id="frog-path">
+            <!-- จุดเริ่มต้น: เจ้ากบ -->
+            <div class="path-cell start-cell" id="fcell-0">🐸</div>
+            <!-- ใบบัวที่ซ่อนอยู่ใต้เง่น้ำ -->
+            <div class="path-cell locked" id="fcell-1">🍃</div>
+            <div class="path-cell locked" id="fcell-2">🍃</div>
+            <div class="path-cell locked" id="fcell-3">🍃</div>
+            <div class="path-cell locked" id="fcell-4">🍃</div>
+            <!-- จุดหมาย: ดอกบัว -->
+            <div class="path-cell target-cell" id="fcell-5">🪷</div>
+        </div>
+    </div>
+
+    <!-- กล่องโจทย์คำถามคำสั่งเรียงเลข -->
+    <div class="quiz-box">
+        <div class="level-indicator">ใบบัวที่ข้ามผ่าน: <span id="frog-step">0</span> / 5</div>
+        <div class="game-mission" id="frog-mission">กำลังสุ่มคำสั่ง...</div>
+        
+        <!-- ตัวเลขสุ่ม 3 ตัวที่ให้เด็กๆ กดคลิกเพื่อเรียงลำดับ -->
+        <div class="number-buttons-zone" id="number-options">
+            <!-- ปุ่มตัวเลขจะถูกสร้างขึ้นอัตโนมัติด้วย JavaScript -->
+        </div>
+
+        <!-- แถบแสดงคำตอบที่เด็กเลือกกดเรียงไว้ -->
+        <div class="your-answer-bar">
+            <span>คำตอบของหนู:</span>
+            <div class="answer-slots" id="answer-slots"></div>
+        </div>
+        
+        <!-- ปุ่มกดยืนยันคำตอบ และล้างค่า -->
+        <div class="action-btn-zone">
+            <button type="button" class="clear-btn" onclick="clearFrogAnswer()">ล้างคำตอบ 🔄</button>
+            <button type="button" class="submit-btn" onclick="checkFrogAnswer()">ส่งคำตอบ 🌟</button>
+        </div>
+        
+        <!-- ข้อความแจ้งสถานะและปุ่มเริ่มใหม่ -->
+        <div id="frog-feedback" class="game-feedback"></div>
+        <div id="frog-victory" style="display:none; text-align:center; margin-top:15px;">
+            <button type="button" class="restart-btn" onclick="resetFrogGame()">เล่นใหม่อีกครั้ง 🔄</button>
+        </div>
+    </div>
+</div>
+<!---1-->
+<!-- ระบบควบคุมเกมกบกระโดดข้ามใบบัวและตรวจการเรียงลำดับเลข -->
+<script>
+let frogStep = 0;
+const fTotalSteps = 5;
+let originalNumbers = [];
+let userSelections = [];
+let isLessToMore = true; // true = น้อยไปมาก, false = มากไปน้อย
+let fCorrectOrder = [];
+
+// ฟังก์ชันเริ่มต้นและสุ่มโจทย์ใหม่
+function generateFrogQuestion() {
+    userSelections = [];
+    document.getElementById('answer-slots').innerHTML = '';
+    
+    // 1. สุ่มเลือกคำสั่ง (น้อยไปมาก หรือ มากไปน้อย)
+    isLessToMore = Math.random() > 0.5;
+    const missionText = isLessToMore ? "🟢 จงเรียงลำดับตัวเลขจาก [ น้อย ➡️ มาก ]" : "🔵 จงเรียงลำดับตัวเลขจาก [ มาก ➡️ น้อย ]";
+    document.getElementById('frog-mission').innerHTML = missionText;
+
+    // 2. สุ่มตัวเลข 3 ตัวไม่ซ้ำกัน (ช่วง 1 - 30)
+    originalNumbers = [];
+    while(originalNumbers.length < 3) {
+        let r = Math.floor(Math.random() * 30) + 1;
+        if(originalNumbers.indexOf(r) === -1) originalNumbers.push(r);
+    }
+
+    // 3. คำนวณคำตอบที่ถูกต้องตามคำสั่ง
+    fCorrectOrder = [...originalNumbers];
+    if (isLessToMore) {
+        fCorrectOrder.sort((a, b) => a - b); // น้อยไปมาก
+    } else {
+        fCorrectOrder.sort((a, b) => b - a); // มากไปน้อย
+    }
+
+    // 4. สร้างปุ่มตัวเลขให้เด็กๆ คลิก (สุ่มสลับตำแหน่งปุ่มเพื่อความท้าทาย)
+    let displayNumbers = [...originalNumbers].sort(() => Math.random() - 0.5);
+    let optionsHtml = '';
+    displayNumbers.forEach(num => {
+        optionsHtml += `<button type="button" class="num-choice-btn" id="num-btn-${num}" onclick="selectFrogNumber(${num})">${num}</button>`;
+    });
+    document.getElementById('number-options').innerHTML = optionsHtml;
+    document.getElementById('frog-feedback').innerHTML = '';
+}
+
+// ฟังก์ชันเมื่อเด็กๆ คลิกเลือกตัวเลข
+function selectFrogNumber(num) {
+    // ป้องกันการกดตัวเลขซ้ำที่เลือกไปแล้ว
+    if (userSelections.includes(num)) return;
+
+    userSelections.push(num);
+    
+    // ซ่อนปุ่มที่ถูกกดไปแล้ว
+    document.getElementById(`num-btn-${num}`).style.visibility = 'hidden';
+
+    // แสดงตัวเลขในช่องคำตอบของหนู
+    const slots = document.getElementById('answer-slots');
+    slots.innerHTML += `<div class="ans-slot-item">${num}</div>`;
+}
+
+// ฟังก์ชันล้างค่าเพื่อเลือกใหม่ในข้อนั้นๆ
+function clearFrogAnswer() {
+    userSelections = [];
+    document.getElementById('answer-slots').innerHTML = '';
+    
+    // แสดงปุ่มตัวเลขทั้งหมดกลับคืนมา
+    const buttons = document.querySelectorAll('.num-choice-btn');
+    buttons.forEach(btn => {
+        btn.style.visibility = 'visible';
+    });
+    document.getElementById('frog-feedback').innerHTML = '';
+}
+
+// ฟังก์ชันตรวจคำตอบ
+function checkFrogAnswer() {
+    const feedback = document.getElementById('frog-feedback');
+    
+    if (userSelections.length < 3) {
+        feedback.innerHTML = "⚠️ หนูๆ ต้องกดเลือกตัวเลขให้ครบทั้ง 3 ตัวก่อนนะจ๊ะ";
+        feedback.className = "game-feedback warning";
+        return;
+    }
+
+    // ตรวจสอบอาร์เรย์คำตอบว่าตรงกันทุกตำแหน่งไหม
+    let isCorrect = true;
+    for (let i = 0; i < 3; i++) {
+        if (userSelections[i] !== fCorrectOrder[i]) {
+            isCorrect = false;
+            break;
+        }
+    }
+
+    if (isCorrect) {
+        frogStep++;
+        feedback.innerHTML = "🎉 เก่งมากจ้า! เรียงลำดับถูกต้อง 🐸 อ๊บๆ กระโดดแล้ว!";
+        feedback.className = "game-feedback success";
+        
+        updateFrogMap();
+        
+        if (frogStep >= fTotalSteps) {
+            endFrogGame();
+        } else {
+            // ไปข้อต่อไปหลังผ่านไป 1.5 วินาที
+            setTimeout(generateFrogQuestion, 1500);
+        }
+    } else {
+        feedback.innerHTML = "❌ ยังเรียงไม่ถูกต้องนะจ๊ะ ลองกดล้างคำตอบแล้วเรียงใหม่อีกทีนะ";
+        feedback.className = "game-feedback error";
+    }
+}
+
+// ฟังก์ชันขยับเจ้ากบในบ่อน้ำ
+function updateFrogMap() {
+    document.getElementById('frog-step').innerText = frogStep;
+    
+    const prevCell = document.getElementById(`fcell-${frogStep - 1}`);
+    if (prevCell) prevCell.innerHTML = "🌊"; // เปลี่ยนรอยเท้าเก่าเป็นน้ำ
+
+    const currentCell = document.getElementById(`fcell-${frogStep}`);
+    if (currentCell) {
+        currentCell.innerHTML = "🐸";
+        currentCell.className = "path-cell f-active-path";
+    }
+}
+
+// ฟังก์ชันเมื่อชนะเกม (ถึงดอกบัว)
+function endFrogGame() {
+    document.getElementById('frog-mission').innerHTML = "🥳 เย้! เจ้ากบกระโดดมาถึงดอกบัวแสนสวยและปลอดภัยแล้วจ้า! 🪷🐸✨";
+    document.getElementById('number-options').innerHTML = '';
+    document.querySelector('.frog-game-container .action-btn-zone').style.display = 'none';
+    document.getElementById('frog-victory').style.display = 'block';
+    
+    document.getElementById(`fcell-${fTotalSteps}`).innerHTML = "🐸🪷";
+}
+
+// ฟังก์ชันรีเซ็ตเกมเริ่มใหม่ตั้งแต่ศูนย์
+function resetFrogGame() {
+    frogStep = 0;
+    document.getElementById('frog-step').innerText = frogStep;
+    document.querySelector('.frog-game-container .action-btn-zone').style.display = 'flex';
+    document.getElementById('frog-victory').style.display = 'none';
+    document.getElementById('frog-feedback').innerHTML = '';
+    
+    document.getElementById('fcell-0').innerHTML = "🐸";
+    document.getElementById('fcell-0').className = "path-cell start-cell";
+    
+    for (let i = 1; i < fTotalSteps; i++) {
+        document.getElementById(`fcell-${i}`).innerHTML = "🍃";
+        document.getElementById(`fcell-${i}`).className = "path-cell locked";
+    }
+    
+    document.getElementById(`fcell-${fTotalSteps}`).innerHTML = "🪷";
+    document.getElementById(`fcell-${fTotalSteps}`).className = "path-cell target-cell";
+    
+    generateFrogQuestion();
+}
+
+// ให้ระบบรันเกมอัตโนมัติ
+setTimeout(resetFrogGame, 300);
+</script>
+<!--2-->
+<!-- สไตล์ตกแต่งฉากเกมสระบัวชุ่มฉ่ำและปุ่มกดสำหรับเด็ก ป.1 -->
+<style>
+    .frog-game-container {
+        background-color: #ecfeff; /* สีฟ้าสระน้ำพาสเทล ชุ่มฉ่ำสบายตา */
+        border: 4px dashed #06b6d4;
+        border-radius: 24px;
+        padding: 25px;
+        max-width: 600px;
+        margin: 20px auto;
+        font-family: 'Sarabun', sans-serif;
+        box-shadow: 0 10px 20px rgba(6, 182, 212, 0.1);
+    }
+    .frog-game-container .game-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px dashed #cffafe;
+        padding-bottom: 15px;
+    }
+    .frog-game-container .game-header h2 {
+        color: #0891b2;
+        margin: 0 0 5px 0;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .frog-game-container .game-header p {
+        color: #155e75;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    /* ฉากแผนที่ใบบัวในสระน้ำ */
+    .frog-game-container .game-scene {
+        background-color: #e0f2fe; /* พื้นหลังสีน้ำทะเล */
+        border: 2px solid #bae6fd;
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 25px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .frog-game-container .path-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .frog-game-container .path-cell {
+        flex: 1;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        border-radius: 50%; /* ทรงกลมรับกับใบบัว */
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .frog-game-container .start-cell { background-color: #fef08a; border: 2px solid #eab308; }
+    .frog-game-container .locked { background-color: #34d399; border: 2px solid #059669; } /* สีเขียวใบไม้ */
+    .frog-game-container .f-active-path { background-color: #a7f3d0; border: 2px solid #10b981; animation: frogJumpPop 0.3s ease; }
+    .frog-game-container .target-cell { background-color: #fbcfe8; border: 2px solid #f472b6; }
+    
+    /* กล่องทำโจทย์เรียงลำดับ */
+    .frog-game-container .quiz-box {
+        background-color: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #bae6fd;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .frog-game-container .level-indicator {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #155e75;
+        margin-bottom: 10px;
+    }
+    .frog-game-container .game-mission {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #1e293b;
+        margin-bottom: 20px;
+        background: #f0f9ff;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #e0f2fe;
+    }
+    
+    /* โซนปุ่มตัวเลือกตัวเลข (ขนาดใหญ่กดง่าย) */
+    .number-buttons-zone {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        min-height: 60px;
+    }
+    .num-choice-btn {
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: white;
+        border: none;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        font-weight: bold;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 6px 10px rgba(2,132,199,0.3);
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .num-choice-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 14px rgba(2,132,199,0.4);
+    }
+    
+    /* แถบแสดงคำตอบของเด็กๆ */
+    .your-answer-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: #f8fafc;
+        padding: 10px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px dashed #cbd5e1;
+    }
+    .your-answer-bar span {
+        font-size: 14px;
+        font-weight: bold;
+        color: #64748b;
+    }
+    .answer-slots {
+        display: flex;
+        gap: 10px;
+        min-width: 150px;
+        min-height: 40px;
+    }
+    .ans-slot-item {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 2px solid #0284c7;
+        padding: 4px 15px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 8px;
+        animation: frogJumpPop 0.2s ease;
+    }
+    
+    /* โซนปุ่มควบคุมด้านล่าง */
+    .frog-game-container .action-btn-zone {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    .frog-game-container .clear-btn, .frog-game-container .submit-btn {
+        border: none;
+        padding: 12px 25px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        color: white;
+    }
+    .frog-game-container .clear-btn {
+        background-color: #94a3b8;
+        box-shadow: 0 4px 6px rgba(148,163,184,0.2);
+    }
+    .frog-game-container .clear-btn:hover { background-color: #64748b; }
+    
+    .frog-game-container .submit-btn {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        box-shadow: 0 4px 6px rgba(34,197,94,0.2);
+    }
+    .frog-game-container .submit-btn:hover { transform: scale(1.03); }
+    
+    /* แจ้งสถานะและปุ่มจบเกม */
+    .frog-game-container .game-feedback {
+        text-align: center;
+        font-size: 15px;
+        font-weight: bold;
+        min-height: 25px;
+        margin-top: 15px;
+    }
+    .frog-game-container .success { color: #16a34a; }
+    .frog-game-container .error { color: #dc2626; }
+    .frog-game-container .warning { color: #ea580c; }
+    
+    .frog-game-container .restart-btn {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(6,182,212,0.2);
+        transition: transform 0.2s;
+    }
+    .frog-game-container .restart-btn:hover { transform: translateY(-2px); }
+    
+    @keyframes frogJumpPop {
+        0% { transform: scale(0.7); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* ปรับแต่งขนาดเมื่อเปิดบนจอมือถือ */
+    @media (max-width: 480px) {
+        .frog-game-container { padding: 15px; }
+        .frog-game-container .path-cell { font-size: 20px; }
+        .frog-game-container .game-mission { font-size: 15px; }
+        .num-choice-btn { width: 50px; height: 50px; font-size: 20px; }
+        .frog-game-container .action-btn-zone { flex-direction: column; gap: 10px; }
+        .frog-game-container .clear-btn, .frog-game-container .submit-btn { width: 100%; text-align: center; }
+        .your-answer-bar { flex-direction: column; gap: 8px; }
+    }
+</style>
