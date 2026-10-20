@@ -13,18 +13,17 @@
         /* 📋 กล่องแสดงโจทย์ประโยคสัญลักษณ์ */
         .question-box { background-color: #fff3cd; border: 2px solid #ffb300; padding: 15px; border-radius: 12px; font-size: 2rem; font-weight: bold; color: #b78103; margin-bottom: 25px; display: inline-block; padding: 10px 40px; }
 
-        /* 📐 พื้นที่แผนภาพส่วนย่อยส่วนรวม (ทรงสามเหลี่ยมแนวตั้ง) */
+        /* 📐 พื้นที่แผนภาพส่วนย่อยส่วนรวม (แนวตั้ง) */
         .diagram-container { position: relative; width: 300px; height: 260px; margin: 0 auto 30px auto; }
-        .circle-slot { display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; position: absolute; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); transition: background-color 0.2s; z-index: 2; }
+        .circle-slot { display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; position: absolute; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; z-index: 2; cursor: pointer; background-color: #f9f9f9; }
         
         /* 🔴 วงกลมส่วนรวม (Whole) อยู่บนสุดตรงกลาง */
         .slot-whole { width: 80px; height: 80px; border-radius: 50%; background-color: #ffebee; border: 4px dashed #c62828; left: 110px; top: 10px; color: #c62828; }
-        /* 🌗 ส่วนย่อย (Parts) ด้านล่าง ซ้ายและขวา ทรงตัว D หันขวา */
+        /* 🌗 ส่วนย่อย (Parts) ด้านล่าง ทรงตัว D หันขวา */
         .slot-part1, .slot-part2 { width: 45px; height: 90px; border-radius: 0 90px 90px 0; background-color: #e8f5e9; border: 4px dashed #2e7d32; border-left: none; padding-right: 10px; bottom: 15px; color: #2e7d32; }
         .slot-part1 { left: 35px; }
         .slot-part2 { right: 35px; }
         
-        /* ข้อความใต้รูปทรง */
         .slot-whole::after { content: "ส่วนรวม"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #c62828; font-weight: normal; left: 0; right: 0; text-align: center; }
         .slot-part1::after, .slot-part2::after { content: "ส่วนย่อย"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #2e7d32; font-weight: normal; left: 0; right: 0; text-align: center; }
 
@@ -33,15 +32,15 @@
         .line-top { left: 148px; transform: rotate(32deg); }      
         .line-bottom { right: 148px; transform: rotate(-32deg); }  
 
-        /* 📦 กองชิ้นส่วนที่แกะออกมาจากโจทย์ */
+        /* 📦 กองชิ้นส่วนตัวเลือก */
         .pool-title { text-align: left; font-weight: bold; color: #666; font-size: 0.95rem; margin-bottom: 10px; }
         .item-pool { display: flex; justify-content: center; gap: 20px; min-height: 75px; padding: 15px; background: #f9f9f9; border-radius: 12px; border: 1px dashed #ccc; }
         
-        /* บล็อกตัวเลขที่ลากได้ */
-        .drag-card { width: 65px; height: 65px; background-color: #2196f3; color: white; border-radius: 12px; font-size: 1.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.15); touch-action: none; z-index: 10; }
-        .drag-card:active { cursor: grabbing; }
+        /* บล็อกตัวเลขชอยส์ */
+        .select-card { width: 65px; height: 65px; background-color: #2196f3; color: white; border-radius: 12px; font-size: 1.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.15); transition: 0.2s; }
+        .select-card.selected { background-color: #ff9800; transform: scale(1.1); box-shadow: 0 0 12px #ff9800; }
 
-        /* ส่วนควบคุม */
+        /* ส่วนแสดงสถานะผลลัพธ์ */
         .btn-next { display: inline-block; padding: 12px 35px; background-color: #4caf50; color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-next:hover { background-color: #43a047; }
         .result-box { margin-top: 20px; min-height: 45px; }
@@ -51,38 +50,35 @@
 <body>
 
     <div class="game-container">
-        <h1>🎒 เกมแยกส่วนย่อย-ส่วนรวมจากโจทย์ (10 ข้อเต็ม)</h1>
+        <h1>🎒 เกมแยกส่วนย่อย-ส่วนรวมจากโจทย์ (เวอร์ชัน iPhone เสถียรที่สุด)</h1>
         <p class="instructions">
-            <b>คำชี้แจง:</b> สังเกตโจทย์ประโยคสัญลักษณ์ แล้วลากตัวเลขและช่อง ⬜ ด้านล่าง ไปใส่ในแผนภาพส่วนย่อยส่วนรวมให้ถูกต้องตามความสัมพันธ์
+            <b>วิธีเล่น:</b> 1. จิ้มเลือกตัวเลขหรือช่อง ⬜ ด้านล่างให้ขึ้นสีส้ม <br>2. จิ้มช่องในแผนภาพที่ต้องการนำไปวาง (จิ้มซ้ำที่แผนภาพเพื่อดึงตัวเลขกลับมาได้)
         </p>
         
-        <!-- กล่องแสดงโจทย์ประจำข้อ -->
         <div class="question-box" id="question-text">กำลังโหลดโจทย์...</div>
 
-        <!-- 📐 แผนภาพส่วนย่อยส่วนรวมแนวตั้ง -->
         <div class="diagram-container">
             <div class="line line-top"></div>
             <div class="line line-bottom"></div>
             
-            <div class="circle-slot slot-whole" id="whole"></div>
-            <div class="circle-slot slot-part1" id="part1"></div>
-            <div class="circle-slot slot-part2" id="part2"></div>
+            <div class="circle-slot slot-whole" id="whole" onclick="placeItem('whole')"></div>
+            <div class="circle-slot slot-part1" id="part1" onclick="placeItem('part1')"></div>
+            <div class="circle-slot slot-part2" id="part2" onclick="placeItem('part2')"></div>
         </div>
 
-        <!-- Gกองการ์ดชิ้นส่วนโจทย์ -->
         <div class="pool-zone">
-            <div class="pool-title">👇 ลากชิ้นส่วนจากตรงนี้ไปใส่ในแผนภาพ:</div>
+            <div class="pool-title">👇 เลือกชิ้นส่วนคำตอบจากตรงนี้:</div>
             <div class="item-pool" id="item-pool"></div>
         </div>
 
         <div class="result-box" id="result-message"></div>
         <div class="score-board" id="score-board">คะแนน: 0 | ข้อที่: 1 / 10</div>
     </div>
-    <!-- โค้ดควบคุมระบบเกม ตรรกะโจทย์ 10 ข้อ และการควบคุมลากวาง -->
+    <!-- ระบบตรรกะควบคุมเกม 10 ข้อ และฟังก์ชันการคลิกเลือกย้ายวัตถุ -->
     <script>
         // 📊 คลังโจทย์ 10 ข้อเต็ม ตัวเลขขยายขอบเขตไม่เกิน 100
         const questions = [
-            { text: "⬜ + 20 = 70", whole: 70, part1: "⬜", part2: 20 },
+             { text: "⬜ + 20 = 70", whole: 70, part1: "⬜", part2: 20 },
             { text: "85 - ⬜ = 50", whole: 85, part1: "⬜", part2: 50 },
             { text: "⬜ - 15 = 45", whole: "⬜", part1: 45, part2: 15 }, 
             { text: "40 + 35 = ⬜", whole: "⬜", part1: 40, part2: 35 }, 
@@ -96,22 +92,25 @@
 
         let currentLevel = 0;
         let score = 0;
-        let activeCard = null;
+        let selectedValue = null; // เก็บค่าที่กำลังเลือกอยู่
+        let selectedElementId = null; // เก็บ id ของการ์ดที่ถูกเลือก
 
         // เริ่มต้นเซ็ตโจทย์แต่ละข้อ
         function initGame() {
             document.getElementById('result-message').innerHTML = "";
+            selectedValue = null;
+            selectedElementId = null;
             
-            // ล้างช่องในแผนภาพ
-            document.getElementById('whole').innerHTML = "";
-            document.getElementById('part1').innerHTML = "";
-            document.getElementById('part2').innerHTML = "";
+            // ล้างช่องในแผนภาพทั้งหมด
+            document.getElementById('whole').innerText = "";
+            document.getElementById('part1').innerText = "";
+            document.getElementById('part2').innerText = "";
 
             const q = questions[currentLevel];
             document.getElementById('question-text').innerText = `โจทย์: ${q.text}`;
             document.getElementById('score-board').innerText = `คะแนน: ${score} | ข้อที่: ${currentLevel + 1} / ${questions.length}`;
 
-            // สลับตำแหน่งกองการ์ดไอเทมเพื่อไม่ให้เดาทางถูก
+            // สลับตำแหน่งกองการ์ดชอยส์ด้านล่าง
             const cardsData = [q.whole.toString(), q.part1.toString(), q.part2.toString()].sort(() => Math.random() - 0.5);
             
             const pool = document.getElementById('item-pool');
@@ -119,95 +118,86 @@
 
             cardsData.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = 'drag-card';
+                card.className = 'select-card';
                 card.innerText = item;
-                card.id = `drag-item-${index}`;
-                card.setAttribute('draggable', 'true');
+                card.id = `card-item-${index}`;
+                card.style.display = 'flex';
                 
-                // สำหรับ PC
-                card.addEventListener('dragstart', dragStart);
-                
-                // สำหรับ iPhone / iOS / Android
-                card.addEventListener('touchstart', touchStart, {passive: false});
-                card.addEventListener('touchmove', touchMove, {passive: false});
-                card.addEventListener('touchend', touchEnd);
+                // ใช้ระบบจิ้มเลือกแทนการลาก (เสถียรบน iPhone 100%)
+                card.onclick = () => selectCard(card, item);
 
                 pool.appendChild(card);
             });
         }
 
-        // --- ระบบสำหรับคอมพิวเตอร์ (PC) ---
-        function dragStart(e) { e.dataTransfer.setData('text/plain', e.target.id); }
+        // ฟังก์ชันเมื่อจิ้มเลือกการ์ดด้านล่าง
+        function selectCard(cardElement, value) {
+            // ล้างไฮไลท์สีส้มของการ์ดอันอื่นก่อน
+            const activeCards = document.querySelectorAll('.select-card');
+            activeCards.forEach(c => c.classList.remove('selected'));
 
-        const targetSlots = document.querySelectorAll('.circle-slot, #item-pool');
-        targetSlots.forEach(slot => {
-            slot.addEventListener('dragover', e => e.preventDefault());
-            slot.addEventListener('drop', e => {
-                e.preventDefault();
-                const id = e.dataTransfer.getData('text');
-                const card = document.getElementById(id);
-                if (slot.id === 'item-pool' || slot.children.length === 0) {
-                    slot.appendChild(card);
-                    checkAnswer(); 
-                }
-            });
-        });
-
-        // --- ระบบสำหรับหน้าจอสัมผัส (iPhone / iOS) ---
-               function touchStart(e) {
-            activeCard = e.target;
-            activeCard.style.position = 'absolute';
-            moveAt(e.touches[0].clientX, e.touches[0].clientY);
-        }
-
-        function touchMove(e) {
-            e.preventDefault();
-            if (!activeCard) return;
-            moveAt(e.touches.pageX, e.touches.pageY);
-        }
-              function moveAt(clientX, clientY) {
-            activeCard.style.left = clientX - activeCard.offsetWidth / 2 + window.scrollX + 'px';
-            activeCard.style.top = clientY - activeCard.offsetHeight / 2 + window.scrollY + 'px';
-        }
-
-        function touchEnd(e) {
-            if (!activeCard) return;
-            activeCard.style.position = 'static';
-            const touch = e.changedTouches;
-            activeCard.style.display = 'none'; 
-            const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            activeCard.style.display = 'flex';
-
-            if (elemBelow) {
-                const slot = elemBelow.closest('.circle-slot') || elemBelow.closest('#item-pool');
-                if (slot && (slot.id === 'item-pool' || slot.children.length === 0)) {
-                    slot.appendChild(activeCard);
-                }
+            // ถ้าจิ้มซ้ำอันเดิม ให้ยกเลิกการเลือก
+            if (selectedElementId === cardElement.id) {
+                selectedValue = null;
+                selectedElementId = null;
+                return;
             }
-            activeCard = null;
-            checkAnswer(); 
+
+            // เปิดไฮไลท์สีส้มอันที่เลือก
+            selectedValue = value;
+            selectedElementId = cardElement.id;
+            cardElement.classList.add('selected');
+        }
+
+        // ฟังก์ชันเมื่อจิ้มที่ช่องวางในแผนภาพ (วงกลม/ครึ่งวงกลม)
+        function placeItem(slotId) {
+            const slot = document.getElementById(slotId);
+
+            // กรณีที่ 1: ช่องนั้นมีตัวเลขอยู่แล้ว -> จิ้มเพื่อดึงกลับมาด้านล่าง
+            if (slot.innerText !== "") {
+                const originId = slot.dataset.originId;
+                const originCard = document.getElementById(originId);
+                if (originCard) originCard.style.display = 'flex'; // เอากลับมาแสดงด้านล่าง
+                
+                slot.innerText = "";
+                slot.removeAttribute('data-origin-id');
+                checkAnswer(); // ตรวจสถานะเรียลไทม์
+                return;
+            }
+
+            // กรณีที่ 2: ช่องว่างอยู่ และผู้เล่นเลือกตัวเลขไว้ -> นำตัวเลขไปใส่ในช่อง
+            if (selectedValue !== null && selectedElementId !== null) {
+                slot.innerText = selectedValue;
+                slot.dataset.originId = selectedElementId; // ผูกไอดีบันทึกไว้
+
+                // ซ่อนการ์ดตัวเลือกด้านล่างที่ถูกนำไปใช้แล้ว
+                document.getElementById(selectedElementId).style.display = 'none';
+
+                // เคลียร์ค่าการเลือกชั่วคราว
+                selectedValue = null;
+                selectedElementId = null;
+
+                checkAnswer(); // ตรวจสอบคำตอบ
+            }
         }
         // --- ฟังก์ชันตรวจคำตอบและสร้างสรุปประโยคสัญลักษณ์แบบ Dynamic ไฮไลท์ ---
         function checkAnswer() {
-            const wholeEl = document.getElementById('whole').firstElementChild;
-            const part1El = document.getElementById('part1').firstElementChild;
-            const part2El = document.getElementById('part2').firstElementChild;
+            const wVal = document.getElementById('whole').innerText;
+            const p1Val = document.getElementById('part1').innerText;
+            const p2Val = document.getElementById('part2').innerText;
 
-            if (!wholeEl || !part1El || !part2El) {
+            // ตรวจสอบว่าใส่ครบทั้ง 3 ช่องในแผนภาพหรือยัง
+            if (wVal === "" || p1Val === "" || p2Val === "") {
                 document.getElementById('result-message').innerHTML = "";
                 return;
             }
 
-            const wVal = wholeEl.innerText;
-            const p1Val = part1El.innerText;
-            const p2Val = part2El.innerText;
             const q = questions[currentLevel];
-
             const targetWhole = q.whole.toString();
             const targetP1 = q.part1.toString();
             const targetP2 = q.part2.toString();
 
-            // ตรวจสอบความถูกต้องของการจัดสล็อตส่วนย่อยและส่วนรวม
+            // ตรวจสอบความถูกต้องของการจัดตำแหน่งสล็อตส่วนย่อยและส่วนรวม
             if (wVal === targetWhole && ((p1Val === targetP1 && p2Val === targetP2) || (p1Val === targetP2 && p2Val === targetP1))) {
                 
                 // 🛠️ คำนวณประโยคสัญลักษณ์ทั้ง 4 แบบดั้งเดิมจากโมเดลความสัมพันธ์
