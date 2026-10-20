@@ -3,324 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เกมจับคู่การชั่งน้ำหนัก ป.1</title>
+    <title>เกมจับคู่การชั่งน้ำหนัก ป.1 - KruDurian</title>
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #f0fdf4;
-            color: #1e293b;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #16a34a;
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            font-size: 1.1rem;
-            color: #475569;
-            margin-bottom: 30px;
-        }
-        .game-area {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-            margin-bottom: 30px;
-            gap: 140px; /* เพิ่มช่องว่างตรงกลางให้เห็นเส้นชัดเจนขึ้น */
-            padding: 10px 0;
-        }
-        #line-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .connection-line {
-            stroke: #16a34a;
-            stroke-width: 6;
-            stroke-linecap: round;
-            opacity: 0.9;
-        }
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            flex: 1;
-            z-index: 2;
-        }
-        .item {
-            background-color: #f8fafc;
-            border: 3px solid #cbd5e1;
-            padding: 20px 10px;
-            border-radius: 15px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        .item:hover {
-            border-color: #22c55e;
-            background-color: #f0fdf4;
-        }
-        /* บังคับสีปุ่มที่ถูกเลือกให้ชัดเจน */
-        .item.selected {
-            background-color: #bbf7d0 !important;
-            border-color: #22c55e !important;
-            color: #15803d !important;
-        }
-        .item.matched {
-            background-color: #f1f5f9 !important;
-            border-color: #cbd5e1 !important;
-            color: #94a3b8 !important;
-            cursor: default;
-        }
-        .btn {
-            background-color: #22c55e;
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.4);
-        }
-        .score-board {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #16a34a;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-            width: 80%;
-            max-width: 400px;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 5;
-        }
+        body { font-family: sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; text-align: center; user-select: none; }
+        .game-card { max-width: 700px; margin: 10px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.05); position: relative; }
+        h1 { color: #2e7d32; font-size: 1.8rem; margin-bottom: 5px; }
+        .instructions { color: #555; font-size: 1rem; margin-bottom: 20px; }
+        
+        /* พื้นที่วางบล็อกและ Canvas ลากเส้น */
+        .game-area { position: relative; display: flex; justify-content: space-between; margin: 20px 0; min-height: 35px; z-index: 2; }
+        .column { display: flex; flex-direction: column; gap: 15px; width: 42%; z-index: 3; }
+        
+        /* บล็อกตัวเลือก */
+        .item-box { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px; font-size: 1.1rem; font-weight: bold; color: #444; cursor: pointer; transition: 0.2s; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .item-box:hover { border-color: #bcd4b5; background-color: #f9fbf8; }
+        .item-box.selected { border-color: #2e7d32; background-color: #e8f5e9; color: #2e7d32; }
+        .item-box.matched { border-color: #a5d6a7; background-color: #f1f8e9; color: #81c784; cursor: default; }
+
+        /* ตัว Canvas ที่ใช้วาดเส้นจะอยู่ตรงกลางระหว่างบล็อก */
+        #line-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        
+        /* ปุ่มและคะแนน */
+        .score-box { font-size: 1.3rem; font-weight: bold; color: #2e7d32; margin: 20px 0 10px 0; }
+        .btn-reset { display: inline-block; padding: 10px 30px; background-color: #546e7a; color: white; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-reset:hover { background-color: #455a64; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>⚖️ เกมจับคู่การชั่งน้ำหนัก ป.1</h1>
-    <div class="subtitle">คำชี้แจง: คลิกเลือกน้ำหนักฝั่งซ้าย 1 ช่อง และฝั่งขวา 1 ช่องที่มีค่าเท่ากันเพื่อโยงเส้นให้ถูกต้อง!</div>
+    <div class="game-card">
+        <h1>⚖️ เกมจับคู่การชั่งน้ำหนัก ป.1</h1>
+        <p class="instructions">คำชี้แจง: คลิกเลือกน้ำหนักฝั่งซ้าย 1 ช่อง และฝั่งขวา 1 ช่อง ที่มีค่าเท่ากันเพื่อโยงเส้นให้ถูกต้อง!</p>
+        
+        <div class="game-area" id="game-area">
+            <!-- ฉากวาดเส้น Canvas -->
+            <canvas id="line-canvas"></canvas>
+            
+            <!-- ฝั่งซ้าย (โจทย์) -->
+            <div class="column" id="left-column"></div>
+            
+            <!-- ฝั่งขวา (คำตอบ) -->
+            <div class="column" id="right-column"></div>
+        </div>
 
-    <div class="game-area" id="game-area">
-        <svg id="line-svg"></svg>
-        <div class="column" id="left-column"></div>
-        <div class="column" id="right-column"></div>
+        <div class="score-box" id="score-text">คะแนน: 0 / 4</div>
+        <button class="btn-reset" onclick="initGame()">เริ่มเกมใหม่ 🔄</button>
     </div>
+    <script>
+        // ชุดข้อมูลคู่คำตอบที่ถูกต้อง (จับคู่ด้วยรหัส id ที่ตรงกัน)
+        const leftData = [
+            { id: 1, text: "4 กิโลกรัม 8 ขีด" },
+            { id: 2, text: "500 กรัม" },
+            { id: 3, text: "2 กิโลกรัม 500 กรัม" },
+            { id: 4, text: "1 กิโลกรัม 3 ขีด" }
+        ];
 
-    <div class="score-board" id="score-text">คะแนน: 0 / 4</div>
-    <button class="btn" style="margin-top: 20px; background-color: #64748b;" onclick="resetGame()">เริ่มเกมใหม่</button>
-</div>
+        const rightData = [
+            { id: 3, text: "2 กิโลกรัม ครึ่ง" },
+            { id: 2, text: "5 ขีด" },
+            { id: 4, text: "1 กิโลกรัม 300 กรัม" },
+            { id: 1, text: "4,800 กรัม" }
+        ];
 
-<div class="overlay" id="overlay"></div>
-<div class="popup" id="win-popup">
-    <h2>🎉 เก่งมากเลย! 🎉</h2>
-    <p style="font-size: 1.2rem;">หนูๆ โยงเส้นจับคู่ถูกต้องทั้งหมดแล้วค่ะ/ครับ</p>
-    <button class="btn" onclick="resetGame()">เล่นอีกครั้ง</button>
-</div>
-<script>
-    // อัปเดตโจทย์แบบผสมน้ำหนัก (กิโลกรัม ขีด กรัม) สำหรับเด็ก ป.1
-    const data = [
-        { id: 1, left: "1 กิโลกรัม 3 ขีด", right: "1 กิโลกรัม 300 กรัม" },
-        { id: 2, left: "2 กิโลกรัม 500 กรัม", right: "2 กิโลกรัม ครึ่ง" },
-        { id: 3, left: "4 กิโลกรัม 8 ขีด", right: "4,800 กรัม" },
-        { id: 4, left: "500 กรัม", right: "5 ขีด" }
-    ];
+        let selectedLeft = null;
+        let selectedRight = null;
+        let matches = []; // เก็บประวัติคู่ที่ถูกต้อง [ {leftEl, rightEl}, ... ]
+        let score = 0;
 
-    let selectedLeft = null;
-    let selectedRight = null;
-    let score = 0;
+        // เริ่มต้นสร้างปุ่มและกระดานเกม
+        function initGame() {
+            selectedLeft = null;
+            selectedRight = null;
+            matches = [];
+            score = 0;
+            document.getElementById('score-text').innerText = "คะแนน: 0 / 4";
+            
+            // สลับตำแหน่งข้อมูลฝั่งซ้ายและขวาแบบสุ่ม
+            const shuffledLeft = [...leftData].sort(() => Math.random() - 0.5);
+            const shuffledRight = [...rightData].sort(() => Math.random() - 0.5);
 
-    function shuffle(array) {
-        return array.sort(() => Math.random() - 0.5);
-    }
+            const leftCol = document.getElementById('left-column');
+            const rightCol = document.getElementById('right-column');
+            leftCol.innerHTML = "";
+            rightCol.innerHTML = "";
 
-    function initGame() {
-        const leftCol = document.getElementById('left-column');
-        const rightCol = document.getElementById('right-column');
-        const svg = document.getElementById('line-svg');
-        
-        leftCol.innerHTML = '';
-        rightCol.innerHTML = '';
-        svg.innerHTML = ''; 
-        
-        score = 0;
-        selectedLeft = null;
-        selectedRight = null;
-        document.getElementById('score-text').innerText = `คะแนน: ${score} / ${data.length}`;
-        document.getElementById('win-popup').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
+            // สร้างกล่องฝั่งซ้าย
+            shuffledLeft.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'item-box';
+                box.innerText = item.text;
+                box.dataset.id = item.id;
+                box.onclick = () => selectItem(box, 'left');
+                leftCol.appendChild(box);
+            });
 
-        const leftItems = shuffle([...data]);
-        const rightItems = shuffle([...data]);
+            // สร้างกล่องฝั่งขวา
+            shuffledRight.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'item-box';
+                box.innerText = item.text;
+                box.dataset.id = item.id;
+                box.onclick = () => selectItem(box, 'right');
+                rightCol.appendChild(box);
+            });
 
-        leftItems.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'item';
-            div.innerText = item.left;
-            div.dataset.id = item.id;
-            div.onclick = () => selectLeft(div);
-            leftCol.appendChild(div);
-        });
+            setTimeout(resizeCanvas, 100); // ตั้งค่าขนาด Canvas เริ่มต้น
+        }
 
-        rightItems.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'item';
-            div.innerText = item.right;
-            div.dataset.id = item.id;
-            div.onclick = () => selectRight(div);
-            rightCol.appendChild(div);
-        });
-    }
+        // ระบบเลือกบล็อกข้อความ
+        function selectItem(element, side) {
+            if (element.classList.contains('matched')) return;
 
-    function selectLeft(element) {
-        if (element.classList.contains('matched')) return;
-        
-        // ล้างสีไฮไลต์ของกล่องอื่นทั้งหมดในฝั่งซ้าย เพื่อบังคับเลือกได้ทีละ 1 ช่อง
-        const allLeftItems = document.querySelectorAll('#left-column .item');
-        allLeftItems.forEach(item => item.classList.remove('selected'));
-        
-        selectedLeft = element;
-        selectedLeft.classList.add('selected');
-        checkMatch();
-    }
+            if (side === 'left') {
+                // ล้างการเลือกเดิมของฝั่งซ้าย
+                const currentSelected = document.querySelector('#left-column .item-box.selected');
+                if (currentSelected) currentSelected.classList.remove('selected');
+                
+                selectedLeft = element;
+                element.classList.add('selected');
+            } else {
+                // ล้างการเลือกเดิมของฝั่งขวา
+                const currentSelected = document.querySelector('#right-column .item-box.selected');
+                if (currentSelected) currentSelected.classList.remove('selected');
+                
+                selectedRight = element;
+                element.classList.add('selected');
+            }
 
-    function selectRight(element) {
-        if (element.classList.contains('matched')) return;
-        
-        // ล้างสีไฮไลต์ของกล่องอื่นทั้งหมดในฝั่งขวา เพื่อบังคับเลือกได้ทีละ 1 ช่อง
-        const allRightItems = document.querySelectorAll('#right-column .item');
-        allRightItems.forEach(item => item.classList.remove('selected'));
+            // ถ้าเลือกครบทั้งสองฝั่ง ให้ตรวจสอบคำตอบ
+            if (selectedLeft && selectedRight) {
+                checkMatch();
+            }
+        }
 
-        selectedRight = element;
-        selectedRight.classList.add('selected');
-        checkMatch();
-    }
-
-    function drawConnection(leftEl, rightEl) {
-        const svg = document.getElementById('line-svg');
-        const gameArea = document.getElementById('game-area');
-        
-        const gameAreaRect = gameArea.getBoundingClientRect();
-        const leftRect = leftEl.getBoundingClientRect();
-        const rightRect = rightEl.getBoundingClientRect();
-
-               // แก้ไขบรรทัดที่ 244 - 249 ให้ใช้สูตรคำนวณนี้แทนของเดิมครับ
-        const x1 = leftRect.left + leftRect.width - gameAreaRect.left;
-        const y1 = leftRect.top + (leftRect.height / 2) - gameAreaRect.top;
-
-        const x2 = rightRect.left - gameAreaRect.left;
-        const y2 = rightRect.top + (rightRect.height / 2) - gameAreaRect.top;
-
-               // แก้ไขบรรทัดที่ 251 เป็นต้นไป ให้ใช้สคริปต์สมบูรณ์ชุดนี้ครับ
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", x1);
-        line.setAttribute("y1", y1);
-        line.setAttribute("x2", x2);
-        line.setAttribute("y2", y2);
-        line.setAttribute("class", "connection-line");
-        
-        // 🎨 จุดสำคัญ 1: ใส่สีสันและความหนาให้เส้น (หากไม่มีคำสั่งนี้ เส้นจะโปร่งใส)
-        line.setAttribute("stroke", "#2e7d32"); // เส้นสีเขียวเข้ม (หรือครูเปลี่ยนโค้ดสีตามชอบได้ครับ)
-        line.setAttribute("stroke-width", "4");  // ความหนาของเส้น 4 พิกเซล
-        
-        // 🚀 จุดสำคัญ 2: สั่งให้เส้นไปโชว์ในกรอบ svg หลักของเกม
-        svg.appendChild(line);
-
-    }
-
-    function checkMatch() {
-        if (selectedLeft && selectedRight) {
+        // ตรวจสอบความถูกต้อง
+        function checkMatch() {
             if (selectedLeft.dataset.id === selectedRight.dataset.id) {
-                // จับคู่ถูก -> วาดเส้นทันที และเปลี่ยนสถานะเป็น matched
-                drawConnection(selectedLeft, selectedRight);
-
+                // ตอบถูก
                 selectedLeft.classList.remove('selected');
                 selectedRight.classList.remove('selected');
                 selectedLeft.classList.add('matched');
                 selectedRight.classList.add('matched');
-                
-                score++;
-                document.getElementById('score-text').innerText = `คะแนน: ${score} / ${data.length}`;
-                
-                selectedLeft = null;
-                selectedRight = null;
 
-                if (score === data.length) {
-                    setTimeout(() => {
-                        document.getElementById('win-popup').style.display = 'block';
-                        document.getElementById('overlay').style.display = 'block';
-                    }, 500);
-                }
+                // บันทึกคู่นี้ไว้เพื่อวาดเส้นค้างไว้
+                matches.push({ left: selectedLeft, right: selectedRight });
+                score++;
+                document.getElementById('score-text').innerText = `คะแนน: ${score} / 4`;
             } else {
-                // ถ้าจับคู่ผิด ให้เคลียร์สีไฮไลต์ออกใน 0.3 วินาที เพื่อให้เลือกใหม่
-                const wrongLeft = selectedLeft;
-                const wrongRight = selectedRight;
-                setTimeout(() => {
-                    if (wrongLeft && !wrongLeft.classList.contains('matched')) wrongLeft.classList.remove('selected');
-                    if (wrongRight && !wrongRight.classList.contains('matched')) wrongRight.classList.remove('selected');
-                }, 300);
-                selectedLeft = null;
-                selectedRight = null;
+                // ตอบผิด เคลียร์สถานะการเลือก
+                selectedLeft.classList.remove('selected');
+                selectedRight.classList.remove('selected');
+            }
+
+            selectedLeft = null;
+            selectedRight = null;
+            drawAllLines(); // อัปเดตวาดเส้นทั้งหมดใหม่บนจอ
+        }
+
+        // 🎨 ฟังก์ชันวาดเส้นจับคู่ลงบน Canvas
+        function drawAllLines() {
+            const canvas = document.getElementById('line-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // ล้างเส้นเก่าออกก่อน
+
+            const gameArea = document.getElementById('game-area').getBoundingClientRect();
+
+            matches.forEach(pair => {
+                const rectLeft = pair.left.getBoundingClientRect();
+                const rectRight = pair.right.getBoundingClientRect();
+
+                // คำนวณหาจุดกึ่งกลางขอบขวาของกล่องซ้าย และกึ่งกลางขอบซ้ายของกล่องขวา
+                const x1 = rectLeft.right - gameArea.left;
+                const y1 = rectLeft.top + (rectLeft.height / 2) - gameArea.top;
+
+                const x2 = rectRight.left - gameArea.left;
+                const y2 = rectRight.top + (rectRight.height / 2) - gameArea.top;
+
+                // สั่งวาดเส้นตรงจับคู่
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = '#2e7d32'; // สีเส้นจับคู่ (สีเขียว)
+                ctx.lineWidth = 4;            // ความหนาเส้น
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            });
+        }
+
+        // จัดการขนาดของพื้นที่วาดเส้นให้ตรงกับพื้นที่หน้าจอรีไซส์
+        function resizeCanvas() {
+            const canvas = document.getElementById('line-canvas');
+            const gameArea = document.getElementById('game-area');
+            if (canvas && gameArea) {
+                canvas.width = gameArea.clientWidth;
+                canvas.height = gameArea.clientHeight;
+                drawAllLines();
             }
         }
-    }
 
-    function resetGame() {
-        initGame();
-    }
-
-    // วาดเส้นใหม่เมื่อจอมีการเปลี่ยนขนาดหรือย่อขยาย
-    window.addEventListener('resize', () => {
-        const svg = document.getElementById('line-svg');
-        svg.innerHTML = '';
-        const matchedLefts = document.querySelectorAll('#left-column .item.matched');
-        matchedLefts.forEach(leftEl => {
-            const id = leftEl.dataset.id;
-            const rightEl = document.querySelector(`#right-column .item.matched[data-id="${id}"]`);
-            if (rightEl) {
-                drawConnection(leftEl, rightEl);
-            }
-        });
-    });
-
-    window.onload = initGame;
-</script>
+        // ตรวจจับการเปลี่ยนขนาดหน้าจอและสั่งวาดเส้นใหม่เพื่อป้องกันเส้นเบี้ยว
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = initGame;
+    </script>
 </body>
 </html>
