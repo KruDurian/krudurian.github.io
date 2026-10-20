@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมแยกส่วนย่อยส่วนรวมจากโจทย์ - KruDurian</title>
+    <style>
+        body { font-family: sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; text-align: center; user-select: none; }
+        .game-container { max-width: 600px; margin: 20px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        h1 { color: #2e7d32; margin-bottom: 5px; font-size: 1.8rem; }
+        .instructions { color: #555; font-size: 1rem; margin-bottom: 25px; line-height: 1.5; }
+        
+        /* 📋 กล่องแสดงโจทย์ประโยคสัญลักษณ์ */
+        .question-box { background-color: #fff3cd; border: 2px solid #ffb300; padding: 15px; border-radius: 12px; font-size: 2rem; font-weight: bold; color: #b78103; margin-bottom: 25px; display: inline-block; padding: 10px 40px; }
+
+        /* 📐 พื้นที่แผนภาพส่วนย่อยส่วนรวม (ทรงสามเหลี่ยมแนวตั้ง) */
+        .diagram-container { position: relative; width: 300px; height: 260px; margin: 0 auto 30px auto; }
+        .circle-slot { display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; position: absolute; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); transition: background-color 0.2s; z-index: 2; }
+        
+        /* 🔴 วงกลมส่วนรวม (Whole) อยู่บนสุดตรงกลาง */
+        .slot-whole { width: 80px; height: 80px; border-radius: 50%; background-color: #ffebee; border: 4px dashed #c62828; left: 110px; top: 10px; color: #c62828; }
+        /* 🌗 ส่วนย่อย (Parts) ด้านล่าง ซ้ายและขวา ทรงตัว D หันขวา */
+        .slot-part1, .slot-part2 { width: 45px; height: 90px; border-radius: 0 90px 90px 0; background-color: #e8f5e9; border: 4px dashed #2e7d32; border-left: none; padding-right: 10px; bottom: 15px; color: #2e7d32; }
+        .slot-part1 { left: 35px; }
+        .slot-part2 { right: 35px; }
+        
+        /* ข้อความใต้รูปทรง */
+        .slot-whole::after { content: "ส่วนรวม"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #c62828; font-weight: normal; left: 0; right: 0; text-align: center; }
+        .slot-part1::after, .slot-part2::after { content: "ส่วนย่อย"; font-size: 0.75rem; position: absolute; bottom: -22px; color: #2e7d32; font-weight: normal; left: 0; right: 0; text-align: center; }
+
+        /* เส้นเชื่อมโยงแผนภาพ */
+        .line { position: absolute; background-color: #b0bec5; z-index: 1; width: 4px; height: 115px; top: 80px; transform-origin: top center; }
+        .line-top { left: 148px; transform: rotate(32deg); }      
+        .line-bottom { right: 148px; transform: rotate(-32deg); }  
+
+        /* 📦 กองชิ้นส่วนที่แกะออกมาจากโจทย์ */
+        .pool-title { text-align: left; font-weight: bold; color: #666; font-size: 0.95rem; margin-bottom: 10px; }
+        .item-pool { display: flex; justify-content: center; gap: 20px; min-height: 75px; padding: 15px; background: #f9f9f9; border-radius: 12px; border: 1px dashed #ccc; }
+        
+        /* บล็อกตัวเลขที่ลากได้ */
+        .drag-card { width: 65px; height: 65px; background-color: #2196f3; color: white; border-radius: 12px; font-size: 1.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.15); touch-action: none; z-index: 10; }
+        .drag-card:active { cursor: grabbing; }
+
+        /* ส่วนควบคุม */
+        .btn-next { display: inline-block; padding: 12px 35px; background-color: #4caf50; color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-next:hover { background-color: #43a047; }
+        .result-box { margin-top: 20px; min-height: 45px; }
+        .score-board { font-size: 1.1rem; margin-top: 10px; color: #666; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🎒 เกมแยกส่วนย่อย-ส่วนรวมจากโจทย์ (10 ข้อเต็ม)</h1>
+        <p class="instructions">
+            <b>คำชี้แจง:</b> สังเกตโจทย์ประโยคสัญลักษณ์ แล้วลากตัวเลขและช่อง ⬜ ด้านล่าง ไปใส่ในแผนภาพส่วนย่อยส่วนรวมให้ถูกต้องตามความสัมพันธ์
+        </p>
+        
+        <!-- กล่องแสดงโจทย์ประจำข้อ -->
+        <div class="question-box" id="question-text">กำลังโหลดโจทย์...</div>
+
+        <!-- 📐 แผนภาพส่วนย่อยส่วนรวมแนวตั้ง -->
+        <div class="diagram-container">
+            <div class="line line-top"></div>
+            <div class="line line-bottom"></div>
+            
+            <div class="circle-slot slot-whole" id="whole"></div>
+            <div class="circle-slot slot-part1" id="part1"></div>
+            <div class="circle-slot slot-part2" id="part2"></div>
+        </div>
+
+        <!-- Gกองการ์ดชิ้นส่วนโจทย์ -->
+        <div class="pool-zone">
+            <div class="pool-title">👇 ลากชิ้นส่วนจากตรงนี้ไปใส่ในแผนภาพ:</div>
+            <div class="item-pool" id="item-pool"></div>
+        </div>
+
+        <div class="result-box" id="result-message"></div>
+        <div class="score-board" id="score-board">คะแนน: 0 | ข้อที่: 1 / 10</div>
+    </div>
+    <!-- โค้ดควบคุมระบบเกม ตรรกะโจทย์ 10 ข้อ และการควบคุมลากวาง -->
+    <script>
+        // 📊 คลังโจทย์ 10 ข้อเต็ม ตัวเลขขยายขอบเขตไม่เกิน 100
+        const questions = [
+            { text: "⬜ + 20 = 70", whole: 70, part1: "⬜", part2: 20 },
+            { text: "85 - ⬜ = 50", whole: 85, part1: "⬜", part2: 50 },
+            { text: "⬜ - 15 = 45", whole: "⬜", part1: 45, part2: 15 }, 
+            { text: "40 + 35 = ⬜", whole: "⬜", part1: 40, part2: 35 }, 
+            { text: "⬜ + 12 = 92", whole: 92, part1: "⬜", part2: 12 },
+            { text: "66 - ⬜ = 33", whole: 66, part1: "⬜", part2: 33 },
+            { text: "⬜ - 30 = 50", whole: "⬜", part1: 50, part2: 30 },
+            { text: "25 + 55 = ⬜", whole: "⬜", part1: 25, part2: 55 },
+            { text: "⬜ + 42 = 88", whole: 88, part1: "⬜", part2: 42 },
+            { text: "99 - ⬜ = 19", whole: 99, part1: "⬜", part2: 19 }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let activeCard = null;
+
+        // เริ่มต้นเซ็ตโจทย์แต่ละข้อ
+        function initGame() {
+            document.getElementById('result-message').innerHTML = "";
+            
+            // ล้างช่องในแผนภาพ
+            document.getElementById('whole').innerHTML = "";
+            document.getElementById('part1').innerHTML = "";
+            document.getElementById('part2').innerHTML = "";
+
+            const q = questions[currentLevel];
+            document.getElementById('question-text').innerText = `โจทย์: ${q.text}`;
+            document.getElementById('score-board').innerText = `คะแนน: ${score} | ข้อที่: ${currentLevel + 1} / ${questions.length}`;
+
+            // สลับตำแหน่งกองการ์ดไอเทมเพื่อไม่ให้เดาทางถูก
+            const cardsData = [q.whole.toString(), q.part1.toString(), q.part2.toString()].sort(() => Math.random() - 0.5);
+            
+            const pool = document.getElementById('item-pool');
+            pool.innerHTML = "";
+
+            cardsData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'drag-card';
+                card.innerText = item;
+                card.id = `drag-item-${index}`;
+                card.setAttribute('draggable', 'true');
+                
+                // สำหรับ PC
+                card.addEventListener('dragstart', dragStart);
+                
+                // สำหรับ iPhone / iOS / Android
+                card.addEventListener('touchstart', touchStart, {passive: false});
+                card.addEventListener('touchmove', touchMove, {passive: false});
+                card.addEventListener('touchend', touchEnd);
+
+                pool.appendChild(card);
+            });
+        }
+
+        // --- ระบบสำหรับคอมพิวเตอร์ (PC) ---
+        function dragStart(e) { e.dataTransfer.setData('text/plain', e.target.id); }
+
+        const targetSlots = document.querySelectorAll('.circle-slot, #item-pool');
+        targetSlots.forEach(slot => {
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('drop', e => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('text');
+                const card = document.getElementById(id);
+                if (slot.id === 'item-pool' || slot.children.length === 0) {
+                    slot.appendChild(card);
+                    checkAnswer(); 
+                }
+            });
+        });
+
+        // --- ระบบสำหรับหน้าจอสัมผัส (iPhone / iOS) ---
+        function touchStart(e) {
+            activeCard = e.target;
+            activeCard.style.position = 'absolute';
+            moveAt(e.touches[pageX], e.touches.pageY);
+        }
+        function touchMove(e) {
+            e.preventDefault();
+            if (!activeCard) return;
+            moveAt(e.touches.pageX, e.touches.pageY);
+        }
+        function moveAt(pageX, pageY) {
+            activeCard.style.left = pageX - activeCard.offsetWidth / 2 + 'px';
+            activeCard.style.top = pageY - activeCard.offsetHeight / 2 + 'px';
+        }
+        function touchEnd(e) {
+            if (!activeCard) return;
+            activeCard.style.position = 'static';
+            const touch = e.changedTouches;
+            activeCard.style.display = 'none'; 
+            const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            activeCard.style.display = 'flex';
+
+            if (elemBelow) {
+                const slot = elemBelow.closest('.circle-slot') || elemBelow.closest('#item-pool');
+                if (slot && (slot.id === 'item-pool' || slot.children.length === 0)) {
+                    slot.appendChild(activeCard);
+                }
+            }
+            activeCard = null;
+            checkAnswer(); 
+        }
+        // --- ฟังก์ชันตรวจคำตอบและสร้างสรุปประโยคสัญลักษณ์แบบ Dynamic ไฮไลท์ ---
+        function checkAnswer() {
+            const wholeEl = document.getElementById('whole').firstElementChild;
+            const part1El = document.getElementById('part1').firstElementChild;
+            const part2El = document.getElementById('part2').firstElementChild;
+
+            if (!wholeEl || !part1El || !part2El) {
+                document.getElementById('result-message').innerHTML = "";
+                return;
+            }
+
+            const wVal = wholeEl.innerText;
+            const p1Val = part1El.innerText;
+            const p2Val = part2El.innerText;
+            const q = questions[currentLevel];
+
+            const targetWhole = q.whole.toString();
+            const targetP1 = q.part1.toString();
+            const targetP2 = q.part2.toString();
+
+            // ตรวจสอบความถูกต้องของการจัดสล็อตส่วนย่อยและส่วนรวม
+            if (wVal === targetWhole && ((p1Val === targetP1 && p2Val === targetP2) || (p1Val === targetP2 && p2Val === targetP1))) {
+                
+                // 🛠️ คำนวณประโยคสัญลักษณ์ทั้ง 4 แบบดั้งเดิมจากโมเดลความสัมพันธ์
+                let eq1 = `${q.part1} + ${q.part2} = ${q.whole}`;
+                let eq2 = `${q.part2} + ${q.part1} = ${q.whole}`;
+                let eq3 = `${q.whole} - ${q.part1} = ${q.part2}`;
+                let eq4 = `${q.whole} - ${q.part2} = ${q.part1}`;
+
+                // ค้นหาอัตโนมัติว่าประโยคไหนที่ช่องสี่เหลี่ยม (⬜) ไปอยู่ฝั่งขวามือสุด เพื่อทำการไฮไลท์สาดแสง
+                let highlightIndex = 0;
+                if (eq1.endsWith("= ⬜")) highlightIndex = 1;
+                else if (eq2.endsWith("= ⬜")) highlightIndex = 2;
+                else if (eq3.endsWith("= ⬜")) highlightIndex = 3;
+                else if (eq4.endsWith("= ⬜")) highlightIndex = 4;
+
+                // ตกแต่งประโยคที่ถูกเลือกด้วยแถบสีเหลืองและตัวหนา
+                let html1 = (highlightIndex === 1) ? `<span style="background-color: #ffeb3b; padding: 2px 5px; border-radius: 4px; font-weight: bold; color: #d32f2f;">1) ${eq1}</span> <-- ⭐ สังเกตรูปแบบข้อนี้ให้ดีนะจ๊ะ!` : `1) ${eq1}`;
+                let html2 = (highlightIndex === 2) ? `<span style="background-color: #ffeb3b; padding: 2px 5px; border-radius: 4px; font-weight: bold; color: #d32f2f;">2) ${eq2}</span> <-- ⭐ สังเกตรูปแบบข้อนี้ให้ดีนะจ๊ะ!` : `2) ${eq2}`;
+                let html3 = (highlightIndex === 3) ? `<span style="background-color: #ffeb3b; padding: 2px 5px; border-radius: 4px; font-weight: bold; color: #d32f2f;">3) ${eq3}</span> <-- ⭐ สังเกตรูปแบบข้อนี้ให้ดีนะจ๊ะ!` : `3) ${eq3}`;
+                let html4 = (highlightIndex === 4) ? `<span style="background-color: #ffeb3b; padding: 2px 5px; border-radius: 4px; font-weight: bold; color: #d32f2f;">4) ${eq4}</span> <-- ⭐ สังเกตรูปแบบข้อนี้ให้ดีนะจ๊ะ!` : `4) ${eq4}`;
+
+                document.getElementById('result-message').innerHTML = `
+                    <div style="text-align: left; background: #e8f5e9; padding: 15px; border-radius: 12px; border: 2px solid #2e7d32; font-size: 1.1rem; line-height: 1.8; color: #1b5e20;">
+                        <b style="font-size: 1.25rem;">🎉 ถูกต้องแล้วจ้าเด็กๆ! สรุปความสัมพันธ์ได้ดังนี้:</b><br>
+                        🔹 <b>ครึ่งวงกลม + ครึ่งวงกลม = วงกลม</b> (ส่วนย่อย + ส่วนย่อย = ส่วนรวม)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;${html1}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;${html2}<br>
+                        🔹 <b>วงกลม - ครึ่งวงกลม = ครึ่งวงกลม</b> (ส่วนรวม - ส่วนย่อย = ส่วนย่อย)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;${html3}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;${html4}
+                        
+                        <!-- 🎯 กล่องเคล็ดลับคณิตศาสตร์แบบปรับตัวแปรตามข้อที่ไฮไลท์จริง -->
+                        <div style="margin-top: 12px; background: #fffde7; border: 1px dashed #f57f17; padding: 10px; border-radius: 8px; font-size: 0.95rem; color: #e65100;">
+                            📌 <b>เคล็ดลับคณิตศาสตร์:</b> สังเกต <b>ข้อที่มีแถบสีเหลือง</b> จะเป็นรูปแบบที่เด็กๆ คุ้นเคยที่สุด โดยเราสามารถย้ายช่องสี่เหลี่ยม (⬜) ไปไว้เดี่ยวๆ ด้านขวาของเครื่องหมายเท่ากับ เพื่อหาคำตอบได้ง่ายและรวดเร็วขึ้นครับ!
+                        </div>
+
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button class="btn-next" onclick="nextLevel()">ทำข้อถัดไป ➡️</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('result-message').innerHTML = `
+                    <div style="background: #ffebee; color: #c62828; border: 2px solid #c62828; padding: 12px; border-radius: 10px; font-weight: bold;">
+                        ❌ ยังแยกส่วนย่อย-ส่วนรวมไม่ถูกต้องนะจ๊ะ ลองดูความหมายของเครื่องหมายในโจทย์ดีๆ อีกทีนะ!
+                    </div>
+                `;
+            }
+        }
+
+        function nextLevel() {
+            score += 10;
+            currentLevel++;
+            if (currentLevel < questions.length) {
+                initGame();
+            } else {
+                document.getElementById('question-text').innerText = "🏆 เก่งมากๆ จบการเรียนรู้ทั้ง 10 ข้อแล้ว!";
+                document.getElementById('result-message').innerHTML = `
+                    <div style="background: #fff3cd; padding: 25px; border-radius: 15px; font-size: 1.3rem; border: 2px solid #ffeeba; color: #856404; font-weight: bold;">
+                        🎉 ยอดเยี่ยมที่สุดเด็กๆ แยกแยะส่วนย่อยส่วนรวมตัวเลขไม่เกิน 100 ได้ครบถ้วน! คะแนนรวม ${score} คะแนนเต็ม
+                    </div>
+                `;
+                document.getElementById('item-pool').innerHTML = "<b>คุณครูทุเรียนสร้างคลังเกมเสร็จสมบูรณ์ 10 ข้อเต็มเรียบร้อยครับ! 🍏✨</b>";
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
