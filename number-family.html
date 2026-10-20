@@ -208,24 +208,38 @@
             activeCard.style.top = pageY - activeCard.offsetHeight / 2 + 'px';
         }
 
-        function touchEnd(e) {
+                function touchEnd(e) {
             if (!activeCard) return;
+            
+            // คืนค่าตำแหน่งแบบปกติเพื่อตรวจสอบตำแหน่งหล่น
             activeCard.style.position = 'static';
             
-            const touch = e.changedTouches;
+            // แก้ปัญหา iOS: ดึงค่าพิกัดจังหวะการสัมผัสสุดท้ายจาก e.changedTouches
+            const touch = e.changedTouches[0];
+            
+            // ซ่อนการแสดงผลชั่วคราวเพื่อให้ระบบมองทะลุไปเห็นช่องกล่องด้านหลัง
             activeCard.style.display = 'none'; 
+            
+            // ใช้ clientX และ clientY ในการหาตำแหน่งเป้าหมายรองรับ iPhone
             const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            // เปิดการแสดงผลการ์ดตัวเลขตามเดิม
             activeCard.style.display = 'flex';
 
             if (elemBelow) {
+                // ค้นหาช่องกล่องเป้าหมายที่อยู่ใกล้เคียงที่สุด (.circle-slot หรือกอง poolเดิม)
                 const slot = elemBelow.closest('.circle-slot') || elemBelow.closest('#pool');
+                
+                // ตรวจสอบเงื่อนไขว่าช่องนั้นว่างอยู่ หรือเป็นการลากกลับมาไว้ที่กองเดิม
                 if (slot && (slot.id === 'pool' || slot.children.length === 0)) {
                     slot.appendChild(activeCard);
                 }
             }
+            
             activeCard = null;
-            updateRealTimeSummary(); // เรียกทำงานทันทีที่วางตัวเลขลงช่องบนมือถือ
+            updateRealTimeSummary(); // สั่งระบบประมวลผลเรียลไทม์หลังวางสล็อตสำเร็จ
         }
+
 
         // --- 📊 ตรวจสอบตำแหน่งตัวเลขและสรุปผลเรียลไทม์ ---
         function updateRealTimeSummary() {
