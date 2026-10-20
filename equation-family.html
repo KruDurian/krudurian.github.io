@@ -154,11 +154,12 @@
         });
 
         // --- ระบบสำหรับหน้าจอสัมผัส (iPhone / iOS) ---
-        function touchStart(e) {
+               function touchStart(e) {
             activeCard = e.target;
             activeCard.style.position = 'absolute';
-            moveAt(e.touches[pageX], e.touches.pageY);
+            moveAt(e.touches[0].clientX, e.touches[0].clientY);
         }
+
         function touchMove(e) {
             e.preventDefault();
             if (!activeCard) return;
