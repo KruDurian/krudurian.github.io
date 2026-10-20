@@ -241,12 +241,12 @@
         const leftRect = leftEl.getBoundingClientRect();
         const rightRect = rightEl.getBoundingClientRect();
 
-        // คำนวณพิกัดจากตำแหน่งจริงบนจอเทียบกับกรอบพื้นที่เกม เพื่อป้องกันเส้นเยื้อง
-        const x1 = leftRect.right - gameAreaRect.left;
-        const y1 = (leftRect.top + (leftRect.height / 2)) - gameAreaRect.top;
-        
+               // แก้ไขบรรทัดที่ 244 - 249 ให้ใช้สูตรคำนวณนี้แทนของเดิมครับ
+        const x1 = leftRect.left + leftRect.width - gameAreaRect.left;
+        const y1 = leftRect.top + (leftRect.height / 2) - gameAreaRect.top;
+
         const x2 = rightRect.left - gameAreaRect.left;
-        const y2 = (rightRect.top + (rightRect.height / 2)) - gameAreaRect.top;
+        const y2 = rightRect.top + (rightRect.height / 2) - gameAreaRect.top;
 
         const line = document.createElementNS("http://w3.org", "line");
         line.setAttribute("x1", x1);
