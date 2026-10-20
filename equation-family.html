@@ -165,10 +165,11 @@
             if (!activeCard) return;
             moveAt(e.touches.pageX, e.touches.pageY);
         }
-        function moveAt(pageX, pageY) {
-            activeCard.style.left = pageX - activeCard.offsetWidth / 2 + 'px';
-            activeCard.style.top = pageY - activeCard.offsetHeight / 2 + 'px';
+              function moveAt(clientX, clientY) {
+            activeCard.style.left = clientX - activeCard.offsetWidth / 2 + window.scrollX + 'px';
+            activeCard.style.top = clientY - activeCard.offsetHeight / 2 + window.scrollY + 'px';
         }
+
         function touchEnd(e) {
             if (!activeCard) return;
             activeCard.style.position = 'static';
