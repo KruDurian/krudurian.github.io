@@ -1,0 +1,349 @@
+<div class="monkey-game-container">
+    <!-- ส่วนหัวเกม -->
+    <div class="game-header">
+        <h2>🍌 เกมลิงจ๋อตามล่าหาตัวไม่ทราบค่า 🐒</h2>
+        <p>ฝึกทักษะการหาตัวเลขที่หายไป ไม่เกิน 20 (ตอบถูกเพื่อเปิดทาง)</p>
+    </div>
+
+    <!-- ฉากการเดินทาง (Visual Map) -->
+    <div class="game-scene">
+        <div class="path-grid" id="monkey-path">
+            <!-- จุดเริ่มต้น: ลิง -->
+            <div class="path-cell start-cell" id="mcell-0">🐒</div>
+            <!-- ทางเดินที่ถูกปิดไว้ด้วยก้อนหิน -->
+            <div class="path-cell locked" id="mcell-1">🪨</div>
+            <div class="path-cell locked" id="mcell-2">🪨</div>
+            <div class="path-cell locked" id="mcell-3">🪨</div>
+            <div class="path-cell locked" id="mcell-4">🪨</div>
+            <!-- จุดหมาย: กล้วย -->
+            <div class="path-cell target-cell" id="mcell-5">🍌</div>
+        </div>
+    </div>
+
+    <!-- กล่องโจทย์คำถามอินเตอร์แอคทีฟ -->
+    <div class="quiz-box">
+        <div class="level-indicator">ก้าวที่เอาชนะ: <span id="monkey-step">0</span> / 5</div>
+        <div class="math-question" id="monkey-question">กำลังสร้างโจทย์ปริศนา...</div>
+        
+        <!-- ช่องใส่คำตอบสำหรับเด็กๆ -->
+        <div class="answer-zone">
+            <input type="number" id="monkey-answer" placeholder="เติมเลขในช่องว่าง" min="0" max="20" autofocus>
+            <button type="button" class="submit-btn" onclick="checkMonkeyAnswer()">ส่งคำตอบ 🌟</button>
+        </div>
+        
+        <!-- ข้อความแจ้งสถานะและปุ่มเริ่มใหม่ -->
+        <div id="monkey-feedback" class="game-feedback"></div>
+        <div id="monkey-victory" style="display:none; text-align:center; margin-top:15px;">
+            <button type="button" class="restart-btn" onclick="resetMonkeyGame()">เล่นใหม่อีกครั้ง 🔄</button>
+        </div>
+    </div>
+</div>
+<!--1-->
+<!-- ระบบควบคุมเกมลิงจ๋อและสุ่มโจทย์ตัวไม่ทราบค่า -->
+<script>
+let monkeyStep = 0;
+const mTotalSteps = 5;
+let mNum1 = 0;
+let mNum2 = 0;
+let mOperator = '+';
+let mAnswer = 0;
+
+// ฟังก์ชันสุ่มโจทย์หาตัวไม่ทราบค่า ไม่เกิน 20
+function generateMonkeyQuestion() {
+    mOperator = Math.random() > 0.5 ? '+' : '-';
+    let total = 0;
+    let part1 = 0;
+    let part2 = 0;
+
+    if (mOperator === '+') {
+        // การบวก: ผลรวมไม่เกิน 20
+        total = Math.floor(Math.random() * 16) + 5; // 5 ถึง 20
+        part1 = Math.floor(Math.random() * (total - 1)) + 1;
+        part2 = total - part1;
+
+        // สุ่มรูปแบบคำถาม 2 แบบ
+        if (Math.random() > 0.5) {
+            // แบบที่ 1: [⬜] + 5 = 12
+            mAnswer = part1;
+            document.getElementById('monkey-question').innerHTML = `⬜ + ${part2} = ${total}`;
+        } else {
+            // แบบที่ 2: 7 + [⬜] = 15
+            mAnswer = part2;
+            document.getElementById('monkey-question').innerHTML = `${part1} + ⬜ = ${total}`;
+        }
+    } else {
+        // การลบ: ตัวตั้งไม่เกิน 20
+        part1 = Math.floor(Math.random() * 16) + 5; // ตัวตั้ง (5 ถึง 20)
+        total = Math.floor(Math.random() * part1);   // ผลลัพธ์
+        part2 = part1 - total;                       // ตัวลบ
+
+        // สุ่มรูปแบบคำถาม 2 แบบ
+        if (Math.random() > 0.5) {
+            // แบบที่ 1: [⬜] - 4 = 8
+            mAnswer = part1;
+            document.getElementById('monkey-question').innerHTML = `⬜ - ${part2} = ${total}`;
+        } else {
+            // แบบที่ 2: 14 - [⬜] = 6
+            mAnswer = part2;
+            document.getElementById('monkey-question').innerHTML = `${part1} - ⬜ = ${total}`;
+        }
+    }
+
+    document.getElementById('monkey-answer').value = '';
+    document.getElementById('monkey-answer').focus();
+}
+
+// ฟังก์ชันตรวจคำตอบ
+function checkMonkeyAnswer() {
+    const uAns = parseInt(document.getElementById('monkey-answer').value);
+    const feedback = document.getElementById('monkey-feedback');
+    
+    if (isNaN(uAns)) {
+        feedback.innerHTML = "⚠️ หนูๆ อย่าลืมพิมพ์ตัวเลขในช่องว่างนะจ๊ะ";
+        feedback.className = "game-feedback warning";
+        return;
+    }
+
+    if (uAns === mAnswer) {
+        monkeyStep++;
+        feedback.innerHTML = "🎉 ถูกต้องยอดเยี่ยม! 🐒 ลิงจ๋อกระโดดข้ามก้อนหินแล้ว!";
+        feedback.className = "game-feedback success";
+        
+        updateMonkeyMap();
+        
+        if (monkeyStep >= mTotalSteps) {
+            endMonkeyGame();
+        } else {
+            setTimeout(generateMonkeyQuestion, 1500);
+        }
+    } else {
+        feedback.innerHTML = "❌ ยังไม่ถูกจ้า ลองคิดเลขใหม่อีกทีนะคนเก่ง";
+        feedback.className = "game-feedback error";
+    }
+}
+
+// ฟังก์ชันอัปเดตแมพและการเคลื่อนที่ของลิง
+function updateMonkeyMap() {
+    document.getElementById('monkey-step').innerText = monkeyStep;
+    
+    const prevCell = document.getElementById(`mcell-${monkeyStep - 1}`);
+    if (prevCell) prevCell.innerHTML = "🟩";
+
+    const currentCell = document.getElementById(`mcell-${monkeyStep}`);
+    if (currentCell) {
+        currentCell.innerHTML = "🐒";
+        currentCell.className = "path-cell m-active-path";
+    }
+}
+
+// ฟังก์ชันเมื่อชนะเกม
+function endMonkeyGame() {
+    document.getElementById('monkey-question').innerHTML = "🥳 เย้! ลิงจ๋อเดินทางมาถึงต้นกล้วยและได้กินกล้วยแสนอร่อยแล้ว! 🍌🐒✨";
+    document.getElementById('monkey-answer').style.display = 'none';
+    document.querySelector('.monkey-game-container .submit-btn').style.display = 'none';
+    document.getElementById('monkey-victory').style.display = 'block';
+    
+    document.getElementById(`mcell-${mTotalSteps}`).innerHTML = "🐒🍌";
+}
+
+// ฟังก์ชันรีเซ็ตเกมใหม่
+function resetMonkeyGame() {
+    monkeyStep = 0;
+    document.getElementById('monkey-step').innerText = monkeyStep;
+    document.getElementById('monkey-answer').style.display = 'inline-block';
+    document.querySelector('.monkey-game-container .submit-btn').style.display = 'inline-block';
+    document.getElementById('monkey-victory').style.display = 'none';
+    document.getElementById('monkey-feedback').innerHTML = '';
+    
+    document.getElementById('mcell-0').innerHTML = "🐒";
+    document.getElementById('mcell-0').className = "path-cell start-cell";
+    
+    for (let i = 1; i < mTotalSteps; i++) {
+        document.getElementById(`mcell-${i}`).innerHTML = "🪨";
+        document.getElementById(`mcell-${i}`).className = "path-cell locked";
+    }
+    
+    document.getElementById(`mcell-${mTotalSteps}`).innerHTML = "🍌";
+    document.getElementById(`mcell-${mTotalSteps}`).className = "path-cell target-cell";
+    
+    generateMonkeyQuestion();
+}
+
+// รันเกมเมื่อหน้าเว็บพร้อม
+setTimeout(resetMonkeyGame, 300);
+</script>
+<!--2-->
+<!-- สไตล์ตกแต่งฉากเกมลิงจ๋อและปุ่มกดสำหรับเด็ก ป.1 -->
+<style>
+    .monkey-game-container {
+        background-color: #fefce8; /* สีเหลืองกล้วยพาสเทล ดูสดใส */
+        border: 4px dashed #eab308;
+        border-radius: 24px;
+        padding: 25px;
+        max-width: 600px;
+        margin: 20px auto;
+        font-family: 'Sarabun', sans-serif;
+        box-shadow: 0 10px 20px rgba(234, 179, 8, 0.1);
+    }
+    .monkey-game-container .game-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px dashed #fef08a;
+        padding-bottom: 15px;
+    }
+    .monkey-game-container .game-header h2 {
+        color: #854d0e;
+        margin: 0 0 5px 0;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .monkey-game-container .game-header p {
+        color: #713f12;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    /* ฉากแผนที่เส้นทางเดินของลิง */
+    .monkey-game-container .game-scene {
+        background-color: #ffffff;
+        border: 2px solid #fef08a;
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 25px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .monkey-game-container .path-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .monkey-game-container .path-cell {
+        flex: 1;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .monkey-game-container .start-cell { background-color: #fef08a; border: 2px solid #eab308; }
+    .monkey-game-container .locked { background-color: #f3f4f6; border: 2px solid #e5e7eb; }
+    .monkey-game-container .m-active-path { background-color: #bbf7d0; border: 2px solid #4ade80; animation: monkeyPop 0.3s ease; }
+    .monkey-game-container .target-cell { background-color: #fef9c3; border: 2px solid #fde047; }
+    
+    /* กล่องทำโจทย์ตัวไม่ทราบค่า */
+    .monkey-game-container .quiz-box {
+        background-color: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #fef08a;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .monkey-game-container .level-indicator {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #713f12;
+        margin-bottom: 10px;
+    }
+    .monkey-game-container .math-question {
+        text-align: center;
+        font-size: 36px;
+        font-weight: bold;
+        color: #1e293b;
+        margin-bottom: 20px;
+        background: #fefce8;
+        padding: 10px;
+        border-radius: 12px;
+        letter-spacing: 2px;
+        border: 1px solid #fef08a;
+    }
+    
+    /* โซนพิมพ์ตอบ */
+    .monkey-game-container .answer-zone {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    #monkey-answer {
+        width: 150px;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #eab308;
+        border-radius: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        background-color: #fff;
+    }
+    #monkey-answer:focus {
+        border-color: #ca8a04;
+    }
+    .monkey-game-container .submit-btn {
+        background: linear-gradient(135deg, #facc15 0%, #ca8a04 100%);
+        color: #713f12;
+        border: none;
+        padding: 0 25px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        box-shadow: 0 4px 6px rgba(234,179,8,0.2);
+    }
+    .monkey-game-container .submit-btn:hover {
+        transform: scale(1.03);
+    }
+    
+    /* การแจ้งสถานะ ผิด-ถูก */
+    .monkey-game-container .game-feedback {
+        text-align: center;
+        font-size: 15px;
+        font-weight: bold;
+        min-height: 25px;
+        margin-top: 10px;
+    }
+    .monkey-game-container .success { color: #16a34a; }
+    .monkey-game-container .error { color: #dc2626; }
+    .monkey-game-container .warning { color: #ea580c; }
+    
+    /* ปุ่มควบคุมตอนจบเกม */
+    .monkey-game-container .restart-btn {
+        background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+        color: #713f12;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(234,179,8,0.2);
+        transition: transform 0.2s;
+    }
+    .monkey-game-container .restart-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* เอฟเฟกต์เด้งตัวละคร */
+    @keyframes monkeyPop {
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* รองรับขนาดหน้าจอมือถือขนาดเล็ก */
+    @media (max-width: 480px) {
+        .monkey-game-container { padding: 15px; }
+        .monkey-game-container .path-cell { font-size: 22px; }
+        .monkey-game-container .math-question { font-size: 28px; }
+        .monkey-game-container .answer-zone { flex-direction: column; align-items: center; }
+        #monkey-answer { width: 100%; box-sizing: border-box; }
+        .monkey-game-container .submit-btn { width: 100%; padding: 12px 0; }
+    }
+</style>
+<!--3-->
