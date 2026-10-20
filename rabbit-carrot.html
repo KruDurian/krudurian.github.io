@@ -1,0 +1,333 @@
+<div class="math-game-container">
+    <!-- ส่วนหัวเกม -->
+    <div class="game-header">
+        <h2>🥕 เกมกระต่ายน้อยเดินทางไปกินแครอท 🐰</h2>
+        <p>ฝึกทักษะการบวก-ลบเลขไม่เกิน 20 (ตอบถูกเพื่อเปิดทางไปต่อ)</p>
+    </div>
+
+    <!-- ฉากการเดินทาง (Visual Map) -->
+    <div class="game-scene">
+        <div class="path-grid" id="game-path">
+            <!-- จุดเริ่มต้น: กระต่าย -->
+            <div class="path-cell start-cell" id="cell-0">🐰</div>
+            <!-- ทางเดินที่ถูกปิดไว้ในตอนแรก -->
+            <div class="path-cell locked" id="cell-1">🪵</div>
+            <div class="path-cell locked" id="cell-2">🪵</div>
+            <div class="path-cell locked" id="cell-3">🪵</div>
+            <div class="path-cell locked" id="cell-4">🪵</div>
+            <!-- จุดหมาย: แครอท -->
+            <div class="path-cell target-cell" id="cell-5">🥕</div>
+        </div>
+    </div>
+
+    <!-- กล่องโจทย์คำถามอินเตอร์แอคทีฟ -->
+    <div class="quiz-box">
+        <div class="level-indicator">ก้าวที่เอาชนะ: <span id="current-step">0</span> / 5</div>
+        <div class="math-question" id="question-text">กำลังโหลดโจทย์...</div>
+        
+        <!-- ช่องใส่คำตอบสำหรับเด็กๆ -->
+        <div class="answer-zone">
+            <input type="number" id="user-answer" placeholder="พิมพ์คำตอบที่นี่" min="0" max="20" autofocus>
+            <button type="button" class="submit-btn" onclick="checkGameAnswer()">ส่งคำตอบ 🌟</button>
+        </div>
+        
+        <!-- ข้อความแจ้งสถานะและปุ่มเริ่มใหม่ -->
+        <div id="game-feedback" class="game-feedback"></div>
+        <div id="victory-zone" style="display:none; text-align:center; margin-top:15px;">
+            <button type="button" class="restart-btn" onclick="resetGame()">เล่นใหม่อีกครั้ง 🔄</button>
+        </div>
+    </div>
+</div>
+<!--1/3->
+
+<!-- ระบบควบคุมเกมและตรวจคำตอบสุ่มโจทย์ -->
+<script>
+let currentStep = 0;
+const totalSteps = 5;
+let num1 = 0;
+let num2 = 0;
+let operator = '+';
+let correctAnswer = 0;
+
+// ฟังก์ชันสุ่มโจทย์บวก-ลบ ไม่เกิน 20
+function generateGameQuestion() {
+    // สุ่มเลือกว่าจะเป็นเครื่องหมายบวก (+) หรือ ลบ (-)
+    operator = Math.random() > 0.5 ? '+' : '-';
+    
+    if (operator === '+') {
+        // การบวก: ผลรวมต้องไม่เกิน 20
+        correctAnswer = Math.floor(Math.random() * 21); // 0 ถึง 20
+        num1 = Math.floor(Math.random() * (correctAnswer + 1));
+        num2 = correctAnswer - num1;
+    } else {
+        // การลบ: ตัวตั้งต้องไม่เกิน 20 และผลลัพธ์ไม่ติดลบ
+        num1 = Math.floor(Math.random() * 16) + 5; // 5 ถึง 20
+        num2 = Math.floor(Math.random() * (num1 + 1));
+        correctAnswer = num1 - num2;
+    }
+
+    // แสดงโจทย์บนหน้าจอ
+    document.getElementById('question-text').innerHTML = `${num1} ${operator} ${num2} = ?`;
+    document.getElementById('user-answer').value = '';
+    document.getElementById('user-answer').focus();
+}
+
+// ฟังก์ชันตรวจคำตอบและขยับตัวละคร
+function checkGameAnswer() {
+    const userAnswer = parseInt(document.getElementById('user-answer').value);
+    const feedback = document.getElementById('game-feedback');
+    
+    if (isNaN(userAnswer)) {
+        feedback.innerHTML = "⚠️ หนูๆ อย่าลืมพิมพ์คำตอบก่อนนะจ๊ะ";
+        feedback.className = "game-feedback warning";
+        return;
+    }
+
+    if (userAnswer === correctAnswer) {
+        currentStep++;
+        feedback.innerHTML = "🎉 เก่งมากเลย! ตอบถูกแล้วจ้า 🐰 กระโดดข้ามไปได้!";
+        feedback.className = "game-feedback success";
+        
+        // อัปเดตตำแหน่งกระต่ายและการเปิดทางบนแมพ
+        updateGameMap();
+        
+        // ตรวจสอบว่าถึงแครอทหรือยัง
+        if (currentStep >= totalSteps) {
+            endGameVictory();
+        } else {
+            // สุ่มโจทย์ข้อต่อไปหลังผ่านไป 1.5 วินาที เพื่อให้เด็กดูอนิเมชั่นขยับก่อน
+            setTimeout(generateGameQuestion, 1500);
+        }
+    } else {
+        feedback.innerHTML = "❌ ยังไม่ถูกนะจ๊ะ ลองนับนิ้วใหม่อีกรอบสิคนเก่ง";
+        feedback.className = "game-feedback error";
+    }
+}
+
+// ฟังก์ชันอัปเดตแผนที่เกม ขยับกระต่ายและเปิดทาง
+function updateGameMap() {
+    document.getElementById('current-step').innerText = currentStep;
+    
+    // ล้างตำแหน่งเก่าของกระต่ายในช่องก่อนหน้าให้กลายเป็นพื้นว่าง
+    const prevCell = document.getElementById(`cell-${currentStep - 1}`);
+    if (prevCell) prevCell.innerHTML = "🟩";
+
+    // ขยับกระต่ายไปยังช่องปัจจุบัน และเปิดขอนไม้ออก
+    const currentCell = document.getElementById(`cell-${currentStep}`);
+    if (currentCell) {
+        currentCell.innerHTML = "🐰";
+        currentCell.className = "path-cell active-path";
+    }
+}
+
+// ฟังก์ชันเมื่อชนะเกม (กินแครอทสำเร็จ)
+function endGameVictory() {
+    document.getElementById('question-text').innerHTML = "🥳 ไชโย! เจ้ากระต่ายได้กินแครอทอิ่มอร่อยแล้วจ้า! 🥕🐰✨";
+    document.getElementById('user-answer').style.display = 'none';
+    document.querySelector('.submit-btn').style.display = 'none';
+    document.getElementById('victory-zone').style.display = 'block';
+    
+    // เปลี่ยนช่องแครอทให้เป็นกระต่ายกินแครอท
+    document.getElementById(`cell-${totalSteps}`).innerHTML = "🐰🥕";
+}
+
+// ฟังก์ชันรีเซ็ตระบบเพื่อเริ่มเล่นใหม่
+function resetGame() {
+    currentStep = 0;
+    document.getElementById('current-step').innerText = currentStep;
+    document.getElementById('user-answer').style.display = 'inline-block';
+    document.querySelector('.submit-btn').style.display = 'inline-block';
+    document.getElementById('victory-zone').style.display = 'none';
+    document.getElementById('game-feedback').innerHTML = '';
+    
+    // รีเซ็ตหน้าตากล่องตารางแมพใหม่ทั้งหมด
+    document.getElementById('cell-0').innerHTML = "🐰";
+    document.getElementById('cell-0').className = "path-cell start-cell";
+    
+    for (let i = 1; i < totalSteps; i++) {
+        document.getElementById(`cell-${i}`).innerHTML = "🪵";
+        document.getElementById(`cell-${i}`).className = "path-cell locked";
+    }
+    
+    document.getElementById(`cell-${totalSteps}`).innerHTML = "🥕";
+    document.getElementById(`cell-${totalSteps}`).className = "path-cell target-cell";
+    
+    generateGameQuestion();
+}
+
+// เรียกให้เกมทำงานทันทีเมื่อโหลดหน้าเว็บ
+setTimeout(resetGame, 300);
+</script>
+<!--2-->
+<!-- สไตล์ตกแต่งฉากเกมกระต่ายน้อยและปุ่มกดสำหรับเด็ก ป.1 -->
+<style>
+    .math-game-container {
+        background-color: #f0fdf4; /* สีเขียวมิ้นท์พาสเทล ดูสบายตา */
+        border: 4px dashed #4ade80;
+        border-radius: 24px;
+        padding: 25px;
+        max-width: 600px;
+        margin: 20px auto;
+        font-family: 'Sarabun', sans-serif;
+        box-shadow: 0 10px 20px rgba(74, 222, 128, 0.1);
+    }
+    .game-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px dashed #bbf7d0;
+        padding-bottom: 15px;
+    }
+    .game-header h2 {
+        color: #166534;
+        margin: 0 0 5px 0;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .game-header p {
+        color: #4b5563;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    /* ฉากแผนที่เส้นทางเดิน */
+    .game-scene {
+        background-color: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 25px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .path-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .path-cell {
+        flex: 1;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .start-cell { background-color: #fef08a; border: 2px solid #facc15; }
+    .locked { background-color: #ffedd5; border: 2px solid #fed7aa; }
+    .active-path { background-color: #bbf7d0; border: 2px solid #4ade80; animation: popEffect 0.3s ease; }
+    .target-cell { background-color: #fee2e2; border: 2px solid #fca5a5; }
+    
+    /* กล่องทำโจทย์ */
+    .quiz-box {
+        background-color: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .level-indicator {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #4b5563;
+        margin-bottom: 10px;
+    }
+    .math-question {
+        text-align: center;
+        font-size: 36px;
+        font-weight: bold;
+        color: #1e293b;
+        margin-bottom: 20px;
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 12px;
+        letter-spacing: 2px;
+    }
+    
+    /* โซนพิมพ์ตอบ */
+    .answer-zone {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    #user-answer {
+        width: 140px;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #cbd5e1;
+        border-radius: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    #user-answer:focus {
+        border-color: #4ade80;
+    }
+    .submit-btn {
+        background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        color: white;
+        border: none;
+        padding: 0 25px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        box-shadow: 0 4px 6px rgba(34,197,94,0.2);
+    }
+    .submit-btn:hover {
+        transform: scale(1.03);
+    }
+    
+    /* การแจ้งสถานะ ผิด-ถูก */
+    .game-feedback {
+        text-align: center;
+        font-size: 15px;
+        font-weight: bold;
+        min-height: 25px;
+        margin-top: 10px;
+    }
+    .success { color: #16a34a; }
+    .error { color: #dc2626; }
+    .warning { color: #ea580c; }
+    
+    /* ปุ่มควบคุมตอนจบเกม */
+    .restart-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(37,99,235,0.2);
+        transition: transform 0.2s;
+    }
+    .restart-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* เอฟเฟกต์เด้งตอนขยับ */
+    @keyframes popEffect {
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* รองรับขนาดหน้าจอมือถือขนาดเล็ก */
+    @media (max-width: 480px) {
+        .math-game-container { padding: 15px; }
+        .path-cell { font-size: 22px; }
+        .math-question { font-size: 28px; }
+        .answer-zone { flex-direction: column; align-items: center; }
+        #user-answer { width: 100%; box-sizing: border-box; }
+        .submit-btn { width: 100%; padding: 12px 0; }
+    }
+</style>
+<!--3-->
