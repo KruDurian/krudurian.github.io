@@ -438,10 +438,67 @@
                 <button class="option-btn" onclick="selectOption(this, 3)">ง. 6 ขีด</button>
             </div>
         </div>
-        </div>
+          </div>
+    
+    <!-- ปุ่มกดสำหรับระบบออนไลน์ -->
     <button class="submit-btn" onclick="checkAnswers()">ตรวจคำตอบของเจ้าหญิง สู้ๆ นะ! 👑</button>
+    <button class="print-btn" onclick="window.print()">🖨️ พิมพ์ใบงานชุดนี้ลงกระดาษ</button>
+    
     <div id="result" class="result-box"></div>
 </div>
+
+<!-- เพิ่มสไตล์พิเศษสำหรับปุ่มพิมพ์ และระบบจัดหน้าสำหรับพิมพ์กระดาษ -->
+<style>
+    .print-btn {
+        display: block;
+        width: 100%;
+        background: #0284c7;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: background 0.2s;
+    }
+    .print-btn:hover {
+        background: #0369a1;
+    }
+
+    /* 🖨️ คำสั่งพิเศษเมื่อกดพิมพ์ลงกระดาษ (จะซ่อนปุ่มและจัดหน้าให้อัตโนมัติ) */
+    @media print {
+        body {
+            background: white !important;
+            padding: 0 !important;
+        }
+        .container {
+            box-shadow: none !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+        /* ซ่อนปุ่มกดและกล่องคะแนนไม่ให้โผล่ไปบนกระดาษ */
+        .submit-btn, .print-btn, .result-box {
+            display: none !important;
+        }
+        .scratchpad {
+            background: white !important;
+            border: 2px dashed #a855f7 !important;
+            page-break-inside: avoid; /* ป้องกันกล่องทดเลขขาดครึ่งหน้า */
+        }
+        .quiz-card {
+            border: 1px solid #cbd5e1 !important;
+            page-break-inside: avoid; /* ป้องกันโจทย์ขาดครึ่งหน้า */
+        }
+        .option-btn {
+            background: white !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #1e293b !important;
+        }
+    }
+</style>
 
 <script>
     const userAnswers = {};
@@ -451,11 +508,9 @@
         const cards = Array.from(document.querySelectorAll('.quiz-card'));
         const cardIndex = cards.indexOf(card);
         
-        // ลบไฮไลท์เดิม
         const buttons = card.querySelectorAll('.option-btn');
         buttons.forEach(btn => btn.classList.remove('selected'));
         
-        // เพิ่มไฮไลท์ปุ่มที่เลือก
         button.classList.add('selected');
         userAnswers[cardIndex] = optionIndex;
     }
@@ -478,38 +533,31 @@
             return;
         }
 
-        // ตรวจคำตอบและแสดงเฉลยถูก/ผิดในแต่ละข้อ
         cards.forEach((card, index) => {
             const correctAnswerIndex = parseInt(card.getAttribute('data-correct'));
             const buttons = card.querySelectorAll('.option-btn');
             
-            // ลบเครื่องหมายหรือการตกแต่งเก่าออกก่อน (ถ้ามี)
             buttons.forEach(btn => {
                 btn.style.border = "2px solid #e2e8f0";
                 btn.style.background = "#f8fafc";
                 btn.style.color = "#1e293b";
-                // ลบข้อความสัญลักษณ์เก่าออก
-                btn.innerHTML = btn.innerHTML.replace(/ (✔️|❌|⭐ ข้อยอดเยี่ยม)\$/, ""); 
+                btn.innerHTML = btn.innerHTML.replace(/ (✔️|❌|⭐ ข้อที่ถูกจ้า)\$/, ""); 
             });
 
-            // ตรวจสอบคำตอบของเด็กๆ
             if (userAnswers[index] === correctAnswerIndex) {
                 score++;
-                // ถ้าถูก: ไฮไลท์ปุ่มที่เลือกเป็นสีเขียว พร้อมเครื่องหมาย ✔️
                 const correctBtn = buttons[correctAnswerIndex];
                 correctBtn.style.background = "#dcfce7";
                 correctBtn.style.borderColor = "#22c55e";
                 correctBtn.style.color = "#15803d";
                 correctBtn.innerHTML += " ✔️";
             } else {
-                // ถ้าผิด: ไฮไลท์ปุ่มที่เด็กตอบผิดเป็นสีแดง พร้อมเครื่องหมาย ❌
                 const wrongBtn = buttons[userAnswers[index]];
                 wrongBtn.style.background = "#fee2e2";
                 wrongBtn.style.borderColor = "#ef4444";
                 wrongBtn.style.color = "#b91c1c";
                 wrongBtn.innerHTML += " ❌";
 
-                // และแอบไฮไลท์ปุ่มที่ถูกต้องจริงๆ เป็นสีเหลือง เพื่อใบ้คำตอบให้เด็กเห็น
                 const correctBtn = buttons[correctAnswerIndex];
                 correctBtn.style.background = "#fef9c3";
                 correctBtn.style.borderColor = "#eab308";
@@ -518,7 +566,6 @@
             }
         });
 
-        // แสดงคะแนนรวมทั้งหมด
         const resultBox = document.getElementById('result');
         resultBox.style.display = 'block';
         resultBox.innerHTML = `🎉 ยอดเยี่ยมมากเลยเพคะ! น้องได้คะแนนทั้งหมด ${score} จาก ${totalQuestions} คะแนน 👑✨<br><small style="font-size:14px; color:#6b21a8;">ลองเลื่อนขึ้นไปดูข้อที่มีเครื่องหมาย ❌ เพื่อดูข้อที่ผิดและคำตอบที่ถูกต้องได้เลยนะจ๊ะ!</small>`;
