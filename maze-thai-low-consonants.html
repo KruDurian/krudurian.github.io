@@ -1,0 +1,221 @@
+<!-- สไตล์ตกแต่งใบงานเขาวงกตอักษรต่ำคู่ สไตล์ KruDurian -->
+<style>
+  .kru-container {
+    font-family: 'Kanit', 'ChulaCharasNew', 'Sarabun', sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f5fafd;
+    border: 3px solid #2196f3; /* ธีมสีฟ้าสดใสเข้ากับทัพพีฟ้า */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .kru-title { color: #0d47a1; margin-bottom: 5px; }
+  .kru-instruction { color: #555; font-size: 16px; margin-bottom: 15px; }
+  
+  /* สไตล์ตารางเขาวงกต - เน้นความอ่านง่ายเพื่อเด็ก ป.1 */
+  .maze-table {
+    margin: 20px auto;
+    border-collapse: separate;
+    border-spacing: 6px;
+  }
+  .maze-cell {
+    width: 52px;
+    height: 52px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: 500; /* ความหนาระดับพอดี แยกพยัญชนะชัดเจน ด ต ไม่หนาเกินไป */
+    cursor: pointer;
+    background-color: #fff;
+    user-select: none;
+    transition: all 0.2s;
+    color: #333;
+  }
+  .maze-cell:hover { background-color: #f5f5f5; }
+  /* ช่องที่เดินผ่านมาแล้ว */
+  .maze-cell.visited { background-color: #bbdefb; border-color: #64b5f6; }
+  /* ช่องปัจจุบันที่คนอยู่ */
+  .maze-cell.man-here { font-size: 28px; background-color: #e3f2fd; border-color: #2196f3; }
+  .maze-cell.end { font-size: 28px; background-color: #e8f5e9; }
+
+  /* ปุ่มควบคุม */
+  .btn-group { margin-top: 20px; }
+  .kru-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    margin: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-reset { background-color: #f44336; color: white; }
+  .btn-random { background-color: #ff9800; color: white; }
+  .kru-btn:hover { opacity: 0.9; transform: scale(1.05); }
+  
+  /* กล่องแจ้งเตือนสีแดงด้านล่าง แทนระบบ Alert ป้องกันภาษาต่างดาว */
+  #kru-alert {
+    font-size: 18px;
+    font-weight: bold;
+    color: #cc0000;
+    margin-top: 15px;
+    min-height: 25px;
+  }
+  
+  /* แสดงผลคะแนน */
+  #score-board {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 15px;
+    color: #2e7d32;
+    display: none;
+  }
+</style>
+
+<div class="kru-container">
+  <h2 class="kru-title">👨‍🍳 เกมใบงานเขาวงกต: ช่วยพ่อค้าตามล่าอักษรต่ำคู่</h2>
+  <p class="kru-instruction"><strong>วิธีเล่น:</strong> คลิกช่อง <strong>"อักษรต่ำคู่" (คนชอบซื้อทัพพีฟ้าฮิ)</strong> ที่อยู่ติดกับตัวพ่อค้าเพื่อนำทางไปส่งหม้อซุปแสนอร่อย 🍲</p>
+
+  <!-- ตารางเขาวงกต 8x8 -->
+  <table class="maze-table" id="maze"></table>
+
+  <!-- กล่องแสดงข้อความแจ้งเตือนเด็กๆ แก้ปัญหาอักษรต่างดาว -->
+  <div id="kru-alert"></div>
+
+  <!-- ปุ่มฟังก์ชันใช้งาน -->
+  <div class="btn-group">
+    <button class="kru-btn btn-reset" onclick="resetMaze()">🔄 เริ่มเดินใหม่ตั้งแต่ต้น</button>
+    <button class="kru-btn btn-random" onclick="generateMaze()">🔀 สุ่มเปลี่ยนตัวอักษรใหม่</button>
+  </div>
+
+  <div id="score-board"></div>
+</div>
+
+<script>
+// คลังอักษรต่ำคู่ 14 ตัวเป๊ะตามหลักวิชาการ
+const lowPairLetters = ['ค', 'ฅ', 'ฆ', 'ช', 'ซ', 'ฌ', 'ฑ', 'ฒ', 'ท', 'ธ', 'พ', 'ฟ', 'ภ', 'ฮ'];
+// ตัวอักษรหมู่อื่นๆ สำหรับใช้เป็นตัวหลอก (ไม่มี ศ ษ ส ห มารบกวนความจำเด็กๆ)
+const otherLetters = ['ก', 'จ', 'ด', 'ต', 'บ', 'ป', 'อ', 'ข', 'ฉ', 'ถ', 'ผ', 'ฝ', 'ง', 'ญ', 'ณ', 'น', 'ม', 'ย', 'ร', 'ล', 'ว', 'ฬ'];
+
+// คลังรูปแบบเส้นทางเดินเขาวงกต 8x8 สุ่มเปลี่ยนทิศทางอัจฉริยะไม่ให้ซ้ำซาก
+const pathTemplates = [
+  ["0,1", "1,1", "1,2", "1,3", "2,3", "2,4", "3,4", "3,5", "4,5", "4,6", "5,6", "6,6", "7,6"],
+  ["1,0", "2,0", "2,1", "2,2", "3,2", "4,2", "4,3", "5,3", "5,4", "5,5", "6,5", "7,5", "7,6"],
+  ["0,1", "0,2", "0,3", "1,3", "2,3", "3,3", "3,4", "3,5", "4,5", "5,5", "6,5", "6,6", "6,7"],
+  ["1,0", "1,1", "2,1", "2,2", "3,2", "3,3", "4,3", "4,4", "5,4", "5,5", "6,5", "6,6", "7,6"],
+  ["0,1", "0,2", "0,3", "0,4", "1,4", "2,4", "3,4", "4,4", "4,5", "4,6", "5,6", "6,6", "7,6"]
+];
+
+let currentPath = [];
+let manPos = { r: 0, c: 0 };
+let mazeData = {}; 
+
+function getRandomLetter(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function showAlert(message) {
+  const alertDiv = document.getElementById('kru-alert');
+  alertDiv.innerHTML = message;
+  setTimeout(() => {
+    if(alertDiv.innerHTML === message) alertDiv.innerHTML = '';
+  }, 3000);
+}
+
+function generateMaze() {
+  const table = document.getElementById('maze');
+  table.innerHTML = '';
+  document.getElementById('score-board').style.display = 'none';
+  document.getElementById('kru-alert').innerHTML = '';
+  manPos = { r: 0, c: 0 };
+  mazeData = {};
+
+  // ระบบสุ่มเส้นทางใหม่ทุกครั้งที่รีโหลดหรือกดปุ่ม
+  currentPath = pathTemplates[Math.floor(Math.random() * pathTemplates.length)];
+
+  for (let r = 0; r < 8; r++) {
+    let row = table.insertRow();
+    for (let c = 0; c < 8; c++) {
+      let cell = row.insertCell();
+      cell.className = 'maze-cell';
+      cell.id = `cell-${r}-${c}`;
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      cell.addEventListener('click', function() {
+        moveMan(parseInt(this.dataset.row), parseInt(this.dataset.col));
+      });
+
+      if (r === 0 && c === 0) {
+        cell.innerHTML = '👨‍🍳';
+        cell.className += ' man-here';
+      } else if (r === 7 && c === 7) {
+        cell.innerHTML = '🍲';
+        cell.className += ' end';
+      } else {
+        // หากอยู่ในตำแหน่งเส้นทางเดิน ให้สุ่มตัวอักษรต่ำคู่ นอกเส้นทางสุ่มคำหลอก
+        let letter = currentPath.includes(`${r},${c}`) ? getRandomLetter(lowPairLetters) : getRandomLetter(otherLetters);
+        cell.innerHTML = letter;
+        mazeData[`${r},${c}`] = letter;
+      }
+    }
+  }
+}
+
+function moveMan(targetR, targetC) {
+  if (targetR === manPos.r && targetC === manPos.c) return;
+
+  let rowDiff = Math.abs(targetR - manPos.r);
+  let colDiff = Math.abs(targetC - manPos.c);
+  let isAdjacent = (rowDiff + colDiff === 1);
+
+  if (!isAdjacent) {
+    showAlert("📢 พ่อค้ากระโดดข้ามช่องไม่ได้นะจ๊ะ ต้องเลือกช่องที่อยู่ติดกันจ้า");
+    return;
+  }
+
+  let isSoup = (targetR === 7 && targetC === 7);
+  let targetLetter = mazeData[`${targetR},${targetC}`];
+  let isLowPair = lowPairLetters.includes(targetLetter);
+
+  if (isLowPair || isSoup) {
+    document.getElementById('kru-alert').innerHTML = '';
+    let oldCell = document.getElementById(`cell-${manPos.r}-${manPos.c}`);
+    oldCell.innerHTML = "";
+    oldCell.classList.remove('man-here');
+    oldCell.classList.add('visited');
+
+    manPos.r = targetR;
+    manPos.c = targetC;
+
+    let newCell = document.getElementById(`cell-${targetR}-${targetC}`);
+    if (isSoup) {
+      newCell.innerHTML = '👨‍🍳🍲';
+      newCell.classList.remove('end');
+      newCell.classList.add('man-here');
+      gameWin();
+    } else {
+      newCell.innerHTML = '👨‍🍳';
+      newCell.classList.add('man-here');
+    }
+  } else {
+    showAlert(`❌ ตัวอักษร "${targetLetter}" ไม่ใช่อักษรต่ำคู่ พ่อค้าเดินผ่านไม่ได้จ้า!`);
+  }
+}
+
+function gameWin() {
+  const scoreBoard = document.getElementById('score-board');
+  scoreBoard.innerHTML = `🏆 ยินดีด้วยจ้า! ส่งหม้อซุปเรียบร้อยแล้ว <br> รับคะแนนเต็ม 10 / 10 คะแนน! 🎉`;
+  scoreBoard.style.display = 'block';
+  scoreBoard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetMaze() {
+  generateMaze();
+}
+
+window.onload = generateMaze;
+</script>
