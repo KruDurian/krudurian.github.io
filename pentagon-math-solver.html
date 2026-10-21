@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pentagon Math Game</title>
+    <title>Pentagon Math Solver</title>
     <style>
         body { font-family: sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; text-align: center; user-select: none; }
         .game-container { max-width: 600px; margin: 10px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
@@ -29,9 +29,9 @@
 <body>
 
     <div class="game-container">
-        <h1>🛑 เกมบวกเลขมุมห้าเหลี่ยม</h1>
+        <h1>🛑 เกมปริศนาห้าเหลี่ยมสุ่มโจทย์อนันต์</h1>
         <p class="instructions">
-            <b>คำชี้แจง:</b> สังเกตตัวเลขทั้ง 5 มุมให้ดี มีตัวเลขอยู่ 1 ตัวที่เป็น <b>"ผลบวกของตัวเลขอื่นอีก 2 ตัว"</b> ลองหาให้เจอแล้วจิ้มตัวเลขนั้นเลยจ้า!
+            <b>คำชี้แจง:</b> สังเกตตัวเลขทั้ง 5 มุมให้ดี มีตัวเลขบางตัวที่เป็น <b>"ผลบวกของตัวเลขอื่นอีก 2 ตัว"</b> ลองหาให้เจอแล้วจิ้มตัวเลขนั้นเลยจ้า! (ระบบสุ่มเลขไม่ซ้ำเล่นได้เรื่อยๆ)
         </p>
         
         <div class="pentagon-area">
@@ -44,86 +44,118 @@
         </div>
 
         <div class="result-box" id="result-message"></div>
-        <div class="score-board" id="score-board">คะแนน: 0 | ข้อที่: 1 / 5</div>
+        <div class="score-board" id="score-board">คะแนน: 0 | ข้อที่: 1</div>
     </div>
 
     <script>
-        // 💡 ปรับวิธีเขียนใหม่: แยกตัวเลขกระจายออกจากกันตรงๆ ไม่มีวงเล็บเหลี่ยมซ้อนแล้วครับ
-            // 💡 แก้ไขตัวเลขข้อ 3 และ 5 ใหม่ เพื่อให้มีคำตอบที่ถูกเพียงคำตอบเดียวชัวร์ๆ ครับครู
-    const questions = [
-        { a: 20, b: 15, c: 35, d: 40, e: 11, ans: 35, note: "20 + 15 = 35" },
-        { a: 12, b: 38, c: 50, d: 22, e: 44, ans: 50, note: "12 + 38 = 50" },
-        { a: 9,  b: 16, c: 25, d: 44, e: 11, ans: 25, note: "9 + 16 = 25" }, // เปลี่ยน 14 เป็น 44, เปลี่ยน 30 เป็น 11
-        { a: 33, b: 14, c: 47, d: 55, e: 21, ans: 47, note: "33 + 14 = 47" },
-        { a: 18, b: 72, c: 90, d: 41, e: 35, ans: 90, note: "18 + 72 = 90" }  // เปลี่ยน 10 เป็น 41, เปลี่ยน 85 เป็น 35
-    ];
-
-
-        let currentLevel = 0;
+        let currentLevel = 1;
         let score = 0;
         let canGuess = true;
         let currentLevelData = [];
 
+        // 🎲 ฟังก์ชันสำหรับสุ่มตัวเลขแบบสุ่มสดขอบเขตไม่เกิน 100
+        function generateRandomQuestion() {
+            let part1, part2, whole;
+            
+            // วนลูปสุ่มจนกว่าจะได้ผลรวมไม่เกิน 100
+            while (true) {
+                part1 = Math.floor(Math.random() * 45) + 2; // เลขเริ่มต้นตัวที่ 1 (2-46)
+                part2 = Math.floor(Math.random() * 45) + 2; // เลขเริ่มต้นตัวที่ 2 (2-46)
+                whole = part1 + part2;
+                if (whole <= 100 && part1 !== part2) break;
+            }
+
+            // สุ่มสร้างเลขหลอกอีก 2 ตัวที่ไม่ซ้ำกับตัวเลขหลัก
+            let fake1, fake2;
+            while (true) {
+                fake1 = Math.floor(Math.random() * 90) + 5;
+                fake2 = Math.floor(Math.random() * 90) + 5;
+                if (fake1 !== part1 && fake1 !== part2 && fake1 !== whole && 
+                    fake2 !== part1 && fake2 !== part2 && fake2 !== whole && fake1 !== fake2) {
+                    break;
+                }
+            }
+
+            // ประกอบร่างเลขทั้ง 5 ตัวแล้วสั่งสลับมุมกระจายตัว
+            let rawNums = [part1, part2, whole, fake1, fake2];
+            return rawNums.sort(() => Math.random() - 0.5);
+        }
+
+        // เปิดฉากดึงโจทย์สุ่มขึ้นมาแสดงผล
         function initGame() {
             document.getElementById('result-message').innerHTML = "";
             canGuess = true;
 
-            const q = questions[currentLevel];
-            document.getElementById('score-board').innerText = "คะแนน: " + score + " | ข้อที่: " + (currentLevel + 1) + " / " + questions.length;
+            document.getElementById('score-board').innerText = "คะแนน: " + score + " | ข้อที่: " + currentLevel;
 
-            // รวมตัวเลขเข้ากระบวนการสลับตำแหน่งแบบอัตโนมัติเบื้องหลัง
-            currentLevelData = [q.a, q.b, q.c, q.d, q.e].sort(() => Math.random() - 0.5);
+            // เรียกฟังก์ชันสุ่มสดหน้างาน
+            currentLevelData = generateRandomQuestion();
 
             for (let i = 0; i < 5; i++) {
                 const btn = document.getElementById("btn-" + i);
                 btn.innerText = currentLevelData[i];
                 btn.className = "corner-btn";
+                btn.setAttribute("data-value", currentLevelData[i]); // ผูกค่าตรวจสด
             }
         }
 
+        // 🧠 ระบบตรวจคำตอบแบบตรวจสด (Dynamic Checking) ทุกทิศทาง
         function guessNumber(index) {
             if (!canGuess) return;
 
-            const clickedNum = currentLevelData[index];
-            const q = questions[currentLevel];
             const btn = document.getElementById("btn-" + index);
+            const clickedNum = parseInt(btn.getAttribute("data-value"));
+            
+            // แยกตัวเลขฝั่งตรงข้ามอีก 4 ตัวออกมาวิเคราะห์
+            let remainingNums = [];
+            for (let i = 0; i < 5; i++) {
+                if (i !== index) {
+                    const otherBtn = document.getElementById("btn-" + i);
+                    remainingNums.push(parseInt(otherBtn.getAttribute("data-value")));
+                }
+            }
 
-            if (clickedNum === q.ans) {
+            // จับคู่คำนวณสดทันทีว่ามีตัวไหนในกลุ่มบวกกันได้ค่าเท่ากับตัวที่กดหรือไม่
+            let isCorrect = false;
+            let foundNote = "";
+
+            for (let i = 0; i < remainingNums.length; i++) {
+                for (let j = i + 1; j < remainingNums.length; j++) {
+                    if (remainingNums[i] + remainingNums[j] === clickedNum) {
+                        isCorrect = true;
+                        foundNote = remainingNums[i] + " + " + remainingNums[j] + " = " + clickedNum;
+                        break;
+                    }
+                }
+                if (isCorrect) break;
+            }
+
+            if (isCorrect) {
                 btn.classList.add('correct');
                 score += 10;
-                document.getElementById('score-board').innerText = "คะแนน: " + score + " | ข้อที่: " + (currentLevel + 1) + " / " + questions.length;
+                document.getElementById('score-board').innerText = "คะแนน: " + score + " | ข้อที่: " + currentLevel;
                 canGuess = false;
 
                 document.getElementById('result-message').innerHTML = 
                     "<div style='background-color: #e8f5e9; border: 2px solid #2e7d32; padding: 15px; border-radius: 12px; color: #1b5e20; font-weight: bold; font-size: 1.15rem;'>" +
-                        "🎉 ถูกต้องแล้วจ้า! ตัวเลขคำตอบคือ " + q.ans + "<br>" +
-                        "💡 ความสัมพันธ์คือ: <span style='background-color: #ffeb3b; padding: 2px 6px; border-radius: 4px; color: #d32f2f;'>" + q.note + "</span> นั่นเอง!" +
+                        "🎉 ถูกต้องแล้วจ้า! ตัวเลขคำตอบคือ " + clickedNum + "<br>" +
+                        "💡 ความสัมพันธ์ที่ระบบตรวจเจอสดๆ คือ: <span style='background-color: #ffeb3b; padding: 2px 6px; border-radius: 4px; color: #d32f2f;'>" + foundNote + "</span>" +
                         "<div style='margin-top: 10px;'><button class='btn-next' onclick='nextLevel()'>ข้อถัดไป ➡️</button></div>" +
                     "</div>";
             } else {
                 btn.classList.add('wrong');
                 document.getElementById('result-message').innerHTML = 
                     "<div style='background-color: #ffebee; border: 2px solid #c62828; padding: 12px; border-radius: 10px; color: #c62828; font-weight: bold;'>" +
-                        "❌ ยังไม่ถูกนะจ๊ะ ลองเอาตัวเลขอื่นจับคู่บวกกันดูอีกทีนะน้า!" +
+                        "❌ ยังไม่ถูกนะจ๊ะ ลองเอาตัวเลขมุมอื่นจับคู่บวกกันดูอีกทีนะ!" +
                     "</div>";
             }
         }
 
+        // ปุ่มกดข้ามข้อแบบสุ่มโจทย์ใหม่ขึ้นมาไม่มีที่สิ้นสุด
         function nextLevel() {
             currentLevel++;
-            if (currentLevel < questions.length) {
-                initGame();
-            } else {
-                document.querySelector('.pentagon-area').style.opacity = "0.3";
-                document.getElementById('result-message').innerHTML = 
-                    "<div style='background: #fff3cd; padding: 20px; border-radius: 15px; font-size: 1.25rem; border: 2px solid #ffeeba; color: #856404; font-weight: bold;'>" +
-                        "🏆 ยอดเยี่ยมที่สุดเด็กๆ! ค้นหาผลบวกมุมห้าเหลี่ยมครบหมดแล้ว<br>" +
-                        "ได้คะแนนรวมทั้งหมด 🌟 " + score + " คะแนนเต็ม 🌟" +
-                    "</div>";
-            }
+            initGame(); // สุ่มโจทย์ใหม่ขึ้นมาทันทีรัวๆ
         }
 
         window.onload = initGame;
     </script>
-</body>
-</html>
