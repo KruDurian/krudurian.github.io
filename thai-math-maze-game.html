@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมโจทย์ปัญหาคณิตศาสตร์ ป.1 ธีมเจ้าหญิง (10 ข้อ)</title>
+    <style>
+        body {
+            font-family: 'ChulaCharasNew', 'Sarabun', sans-serif;
+            background-color: #f3e8ff;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #7c3aed;
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 25px;
+        }
+        .quiz-card {
+            background: #ffffff;
+            border: 2px solid #e9d5ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #4c1d95;
+        }
+        .scratchpad {
+            background: #faf5ff;
+            border: 2px dashed #c084fc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .scratchpad-title {
+            font-size: 14px;
+            color: #7e22ce;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .number-bond-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .bond-circle {
+            width: 55px;
+            height: 55px;
+            border: 3px solid #a855f7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            z-index: 2;
+        }
+        .bond-circle input {
+            width: 45px;
+            border: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+            background: transparent;
+        }
+        .bond-lines {
+            margin-top: -5px;
+            margin-bottom: -5px;
+            z-index: 1;
+        }
+        .bond-children {
+            display: flex;
+            gap: 30px;
+            width: 140px;
+            justify-content: center;
+        }
+        .bond-child {
+            border: 3px solid #f472b6;
+        }
+        .bar-model-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+        .bar-row { display: flex; width: 100%; height: 40px; }
+        .bar-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #7c3aed;
+            box-sizing: border-box;
+            background: white;
+        }
+        .bar-item input {
+            width: 90%;
+            border: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+            background: transparent;
+        }
+        .row1 .bar-item {
+            width: 100%;
+            border-radius: 6px;
+            background-color: #f3e8ff;
+            border-color: #a855f7;
+        }
+        .row2 .bar-item {
+            width: 50%;
+            background-color: #fce7f3;
+            border-color: #f472b6;
+        }
+        .row2 .bar-item:first-child { border-radius: 6px 0 0 6px; border-right: 1px solid #f472b6; }
+        .row2 .bar-item:last-child { border-radius: 0 6px 6px 0; border-left: 1px solid #f472b6; }
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .option-btn.selected { background: #fdf2f8; border-color: #ec4899; color: #db2777; font-weight: bold; }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .submit-btn:hover { background: #6d28d9; }
+        .result-box {
+            display: none;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 20px;
+            background: #fdf2f8;
+            color: #ec4899;
+            border-radius: 15px;
+            border: 2px dashed #f472b6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>👑 โจทย์ปัญหาคณิตศาสตร์เจ้าหญิง ป.1 (10 ข้อ) 👑<br><small style="font-size:16px; color:#6b21a8;">ผสมโจทย์ส่วนย่อย-ส่วนรวม และโจทย์เปรียบเทียบ มากกว่า/น้อยกว่า</small></h1>
+    <div id="quiz-container">
+              <!-- ข้อ 1 -->
+        <div class="quiz-card" data-correct="2">
+            <div class="question-text">ข้อที่ 1: เอลซ่ามีไม้วิเศษยาว 7 เซนติเมตร แอนนามีไม้วิเศษยาว 12 เซนติเมตร ถ้านำไม้วิเศษของทั้งสองคนมาวางต่อกัน จะมีความยาวรวมทั้งหมดกี่เซนติเมตร?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ส่วนรวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="ความยาวทั้งหมด"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="ของเอลซ่า"></div><div class="bar-item"><input type="text" placeholder="ของแอนนา"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 5 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 18 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 19 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 20 เซนติเมตร</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 2 -->
+        <div class="quiz-card" data-correct="1">
+            <div class="question-text">ข้อที่ 2: เอลซ่ามีก้อนน้ำแข็งวิเศษ 25 ขีด แอนนามีก้อนน้ำแข็งน้อยกว่าเอลซ่า 6 ขีด แอนนามีก้อนน้ำแข็งวิเศษกี่ขีด?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ของเอลซ่า"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ของแอนนา"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ต่างกัน"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="แท่งที่ยาวกว่า (เอลซ่า)"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="แท่งสั้นกว่า (แอนนา)"></div><div class="bar-item"><input type="text" placeholder="ส่วนต่าง"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 31 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 19 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 20 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 18 ขีด</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 3 -->
+        <div class="quiz-card" data-correct="0">
+            <div class="question-text">ข้อที่ 3: แอเรียลเก็บเปลือกหอยและก้อนหินสีสวยใส่ถุงมาชั่งรวมกันหนัก 9 กิโลกรัม ถ้ารู้ว่าเป็นน้ำหนักของเปลือกหอย 6 กิโลกรัม ส่วนที่เหลือจะเป็นน้ำหนักของก้อนหินกี่กิโลกรัม?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ส่วนรวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="น้ำหนักรวมทั้งหมด"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="เปลือกหอย"></div><div class="bar-item"><input type="text" placeholder="ก้อนหิน"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 3 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 4 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 6 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 15 กิโลกรัม</button>
+            </div>
+        </div>
+         <!-- ข้อ 4 (แก้ไขคำตอบและปุ่มตัวเลือกให้ถูกต้อง) -->
+        <div class="quiz-card" data-correct="3">
+            <div class="question-text">ข้อที่ 4: แอนนามีริบบิ้นผูกผมยาว 8 เซนติเมตร แอเรียลมีริบบิ้นผูกผมยาวมากกว่าแอนนา 5 เซนติเมตร แอเรียลมีริบบิ้นยาวกี่เซนติเมตร?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="รวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="แท่งยาวกว่า (แอเรียล)"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="แท่งสั้น (แอนนา)"></div><div class="bar-item"><input type="text" placeholder="ส่วนต่าง"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 3 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 11 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 12 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 13 เซนติเมตร</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 5 -->
+        <div class="quiz-card" data-correct="1">
+            <div class="question-text">ข้อที่ 5: แอนนามีริบบิ้นผูกผมยาวทั้งหมด 15 เซนติเมตร แบ่งไปผูกผมให้ตุ๊กตาหิมะโอลาฟส่วนหนึ่ง ทำให้เหลือริบบิ้นยาว 10 เซนติเมตร ริบบิ้นส่วนที่แบ่งให้โอลาฟไปยาวกี่เซนติเมตร?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ส่วนรวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="ความยาวริบบิ้นทั้งหมด"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="ให้โอลาฟ"></div><div class="bar-item"><input type="text" placeholder="ที่เหลืออยู่"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 4 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 5 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 10 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 25 เซนติเมตร</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 6 -->
+        <div class="quiz-card" data-correct="0">
+            <div class="question-text">ข้อที่ 6: แอเรียลมีสร้อยเปลือกหอยยาว 20 เซนติเมตร แอนนามีสร้อยเปลือกหอยสั้นกว่าแอเรียล 4 เซนติเมตร สร้อยของแอนนายาวกี่เซนติเมตร?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ของแอเรียล"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ของแอนนา"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ส่วนต่าง"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="แท่งยาวกว่า (แอเรียล)"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="แท่งสั้นกว่า (แอนนา)"></div><div class="bar-item"><input type="text" placeholder="ส่วนต่าง"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 16 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 24 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 14 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 18 เซนติเมตร</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 7 -->
+        <div class="quiz-card" data-correct="3">
+            <div class="question-text">ข้อที่ 7: เอลซ่าเสกขนมเค้กน้ำแข็งหนัก 5 กิโลกรัม วางไว้บนถาดเงินหนัก 2 กิโลกรัม เมื่อนำขนมเค้กที่อยู่บนถาดไปชั่งรวมกัน จะหนักทั้งหมดกี่กิโลกรัม?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ส่วนรวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="น้ำหนักทั้งหมด"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="เค้กน้ำแข็ง"></div><div class="bar-item"><input type="text" placeholder="ถาดเงิน"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 2 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 3 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 5 กิโลกรัม</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 7 กิโลกรัม</button>
+            </div>
+        </div>
+        <!-- ข้อ 8 -->
+        <div class="quiz-card" data-correct="2">
+            <div class="question-text">ข้อที่ 8: แอนนาชั่งส้มได้หนัก 11 ขีด เอลซ่าชั่งแอปเปิ้ลได้หนักมากกว่าส้มของแอนนาอยู่ 7 ขีด เอลซ่าชั่งแอปเปิ้ลได้หนักกี่ขีด?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ของเอลซ่า"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ของแอนนา"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ส่วนต่าง"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="แท่งหนักกว่า (เอลซ่า)"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="แท่งเบากว่า (แอนนา)"></div><div class="bar-item"><input type="text" placeholder="ส่วนต่าง"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 4 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 17 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 18 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 19 ขีด</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 9 -->
+        <div class="quiz-card" data-correct="1">
+            <div class="question-text">ข้อที่ 9: คทาของเอลซ่ายาว 18 เซนติเมตร คทาของแอนนายาว 10 เซนติเมตร คทาของเอลซ่ายาวกว่าคทาของแอนนากี่เซนติเมตร?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ของเอลซ่า"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ของแอนนา"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ส่วนต่าง"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="แท่งยาวกว่า (เอลซ่า)"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="แท่งสั้นกว่า (แอนนา)"></div><div class="bar-item"><input type="text" placeholder="ส่วนต่าง"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 7 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 8 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 9 เซนติเมตร</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 28 เซนติเมตร</button>
+            </div>
+        </div>
+
+        <!-- ข้อ 10 -->
+        <div class="quiz-card" data-correct="0">
+            <div class="question-text">ข้อที่ 10: แอเรียลตักปลาการ์ตูนหนัก 4 ขีด และตักปลาดาวหนัก 3 ขีด ใส่รวมไว้ในขันใบเดียวกัน สัตว์น้ำทั้งสองตัวในขันมีน้ำหนักรวมกันกี่ขีด?</div>
+            <div class="scratchpad">
+                <div class="scratchpad-title">✨ กล่องทดเลข (คลิกเติมตัวเลขเพื่อช่วยคิดได้เลยจ้า)</div>
+                <div class="number-bond-container">
+                    <div class="bond-circle"><input type="text" placeholder="ส่วนรวม"></div>
+                    <svg class="bond-lines" width="140" height="35" viewBox="0 0 140 35"><line x1="70" y1="0" x2="28" y2="35" stroke="#d8b4fe" stroke-width="3"/><line x1="70" y1="0" x2="112" y2="35" stroke="#d8b4fe" stroke-width="3"/></svg>
+                    <div class="bond-children">
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 1"></div>
+                        <div class="bond-circle bond-child"><input type="text" placeholder="ย่อย 2"></div>
+                    </div>
+                </div>
+                <div class="bar-model-container">
+                    <div class="bar-row row1"><div class="bar-item"><input type="text" placeholder="น้ำหนักรวมทั้งหมด"></div></div>
+                    <div class="bar-row row2"><div class="bar-item"><input type="text" placeholder="ปลาการ์ตูน"></div><div class="bar-item"><input type="text" placeholder="ปลาดาว"></div></div>
+                </div>
+            </div>
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(this, 0)">ก. 7 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 1)">ข. 1 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 2)">ค. 8 ขีด</button>
+                <button class="option-btn" onclick="selectOption(this, 3)">ง. 6 ขีด</button>
+            </div>
+        </div>
+        </div>
+    <button class="submit-btn" onclick="checkAnswers()">ตรวจคำตอบของเจ้าหญิง สู้ๆ นะ! 👑</button>
+    <div id="result" class="result-box"></div>
+</div>
+
+<script>
+    const userAnswers = {};
+
+    function selectOption(button, optionIndex) {
+        const card = button.closest('.quiz-card');
+        const cards = Array.from(document.querySelectorAll('.quiz-card'));
+        const cardIndex = cards.indexOf(card);
+        
+        // ลบไฮไลท์เดิม
+        const buttons = card.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        
+        // เพิ่มไฮไลท์ปุ่มที่เลือก
+        button.classList.add('selected');
+        userAnswers[cardIndex] = optionIndex;
+    }
+
+    function checkAnswers() {
+        const cards = document.querySelectorAll('.quiz-card');
+        let score = 0;
+        let totalQuestions = cards.length;
+        let answeredAll = true;
+
+        for (let i = 0; i < totalQuestions; i++) {
+            if (userAnswers[i] === undefined) {
+                answeredAll = false;
+                break;
+            }
+        }
+
+        if (!answeredAll) {
+            alert("เจ้าหญิงตัวน้อย อย่าลืมเลือกคำตอบให้ครบ 10 ข้อก่อนนะจ๊ะ! 💖");
+            return;
+        }
+
+        // ตรวจคำตอบและแสดงเฉลยถูก/ผิดในแต่ละข้อ
+        cards.forEach((card, index) => {
+            const correctAnswerIndex = parseInt(card.getAttribute('data-correct'));
+            const buttons = card.querySelectorAll('.option-btn');
+            
+            // ลบเครื่องหมายหรือการตกแต่งเก่าออกก่อน (ถ้ามี)
+            buttons.forEach(btn => {
+                btn.style.border = "2px solid #e2e8f0";
+                btn.style.background = "#f8fafc";
+                btn.style.color = "#1e293b";
+                // ลบข้อความสัญลักษณ์เก่าออก
+                btn.innerHTML = btn.innerHTML.replace(/ (✔️|❌|⭐ ข้อยอดเยี่ยม)\$/, ""); 
+            });
+
+            // ตรวจสอบคำตอบของเด็กๆ
+            if (userAnswers[index] === correctAnswerIndex) {
+                score++;
+                // ถ้าถูก: ไฮไลท์ปุ่มที่เลือกเป็นสีเขียว พร้อมเครื่องหมาย ✔️
+                const correctBtn = buttons[correctAnswerIndex];
+                correctBtn.style.background = "#dcfce7";
+                correctBtn.style.borderColor = "#22c55e";
+                correctBtn.style.color = "#15803d";
+                correctBtn.innerHTML += " ✔️";
+            } else {
+                // ถ้าผิด: ไฮไลท์ปุ่มที่เด็กตอบผิดเป็นสีแดง พร้อมเครื่องหมาย ❌
+                const wrongBtn = buttons[userAnswers[index]];
+                wrongBtn.style.background = "#fee2e2";
+                wrongBtn.style.borderColor = "#ef4444";
+                wrongBtn.style.color = "#b91c1c";
+                wrongBtn.innerHTML += " ❌";
+
+                // และแอบไฮไลท์ปุ่มที่ถูกต้องจริงๆ เป็นสีเหลือง เพื่อใบ้คำตอบให้เด็กเห็น
+                const correctBtn = buttons[correctAnswerIndex];
+                correctBtn.style.background = "#fef9c3";
+                correctBtn.style.borderColor = "#eab308";
+                correctBtn.style.color = "#a16207";
+                correctBtn.innerHTML += " ⭐ ข้อที่ถูกจ้า";
+            }
+        });
+
+        // แสดงคะแนนรวมทั้งหมด
+        const resultBox = document.getElementById('result');
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `🎉 ยอดเยี่ยมมากเลยเพคะ! น้องได้คะแนนทั้งหมด ${score} จาก ${totalQuestions} คะแนน 👑✨<br><small style="font-size:14px; color:#6b21a8;">ลองเลื่อนขึ้นไปดูข้อที่มีเครื่องหมาย ❌ เพื่อดูข้อที่ผิดและคำตอบที่ถูกต้องได้เลยนะจ๊ะ!</small>`;
+        resultBox.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
