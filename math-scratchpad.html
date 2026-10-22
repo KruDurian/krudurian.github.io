@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กระดาษทดคณิตศาสตร์ (7 ข้อ)</title>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #fcf8f2;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 25px 35px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        /* หัวข้อหลัก */
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: #ff6b6b;
+            margin: 0;
+            font-size: 26px;
+            text-align: center;
+        }
+
+        /* ปุ่มสั่งพิมพ์แสนน่ารัก */
+        .print-btn {
+            position: absolute;
+            right: 0;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .print-btn:hover {
+            background-color: #ff4747;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .print-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* ปรับสัดส่วนแต่ละบล็อกให้ขยายเต็มที่สำหรับ 7 ข้อพอดีหน้า A4 */
+        .workspace-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #ffe0e6;
+            padding: 15px 0;
+            height: 125px;
+            box-sizing: border-box;
+        }
+        .workspace-block:last-child {
+            border-bottom: none;
+        }
+
+        /* 1. ส่วนย่อย ส่วนรวม แนวตั้ง */
+        .number-bonds {
+            position: relative;
+            width: 180px;
+            height: 120px;
+        }
+        .bonds-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .circle {
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            z-index: 2;
+            box-sizing: border-box;
+        }
+        /* ส่วนรวมอยู่บนตรงกลาง */
+        .whole {
+            background-color: #ffb3ba;
+            border: 3.5px solid #ff6b6b;
+            left: 61px;
+            top: 4px;
+        }
+        /* ส่วนย่อยอยู่ล่าง ซ้าย-ขวา */
+        .part {
+            background-color: #bae1ff;
+            border: 3.5px solid #74b9ff;
+            bottom: 4px;
+        }
+        .part-1 { left: 4px; }
+        .part-2 { right: 4px; }
+
+        /* 2. บาร์โมเดล */
+        .bar-model {
+            width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bar-top {
+            width: 100%;
+            height: 48px;
+            background-color: #ffdfba;
+            border: 3.5px solid #e67e22;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        .bar-bottom-container {
+            display: flex;
+            width: 100%;
+            gap: 12px;
+        }
+        .bar-bottom-half {
+            flex: 1;
+            height: 48px;
+            background-color: #baffc9;
+            border: 3.5px solid #2ecc71;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        /* ตั้งค่าสำหรับการสั่งพิมพ์ A4 หน้าเดียว */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.6cm;
+            }
+            body { background-color: #fff; padding: 0; }
+            .container { box-shadow: none; padding: 10px; max-width: 100%; }
+            .print-btn { display: none; } /* ซ่อนปุ่มเมื่อกดสั่งพิมพ์ */
+            .circle, .bar-top, .bar-bottom-half { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .workspace-block { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-container">
+            <h1>📝 กระดาษทดคณิตศาสตร์แสนสนุก</h1>
+            <!-- ปุ่มสั่งพิมพ์ -->
+            <button class="print-btn" onclick="window.print()">🖨️ สั่งพิมพ์กระดาษทด</button>
+        </div>
+
+        <!-- วนลูปสร้างทั้งหมด 7 ข้อ -->
+        <script>
+            for (let i = 1; i <= 7; i++) {
+                document.write(`
+                <div class="workspace-block">
+                    <!-- ส่วนย่อย ส่วนรวม แนวตั้ง -->
+                    <div class="number-bonds">
+                        <svg class="bonds-svg" viewBox="0 0 180 120">
+                            <line x1="90" y1="33" x2="33" y2="87" stroke="#b2bec3" stroke-width="3.5" />
+                            <line x1="90" y1="33" x2="147" y2="87" stroke="#b2bec3" stroke-width="3.5" />
+                        </svg>
+                        <div class="circle whole"></div>
+                        <div class="circle part part-1"></div>
+                        <div class="circle part part-2"></div>
+                    </div>
+                    <!-- บาร์โมเดล 2 บาร์ บาร์ล่างแบ่งครึ่ง -->
+                    <div class="bar-model">
+                        <div class="bar-top"></div>
+                        <div class="bar-bottom-container">
+                            <div class="bar-bottom-half"></div>
+                            <div class="bar-bottom-half"></div>
+                        </div>
+                    </div>
+                </div>
+                `);
+            }
+        </script>
+
+    </div>
+
+</body>
+</html>
