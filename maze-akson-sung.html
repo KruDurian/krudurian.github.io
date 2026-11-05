@@ -1,0 +1,220 @@
+<!-- สไตล์ตกแต่งใบงานเขาวงกตอักษรสูง สไตล์ KruDurian -->
+<style>
+  .kru-container {
+    font-family: 'Kanit', 'ChulaCharasNew', 'Sarabun', sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fbf9f5;
+    border: 3px solid #9c27b0; /* ปรับธีมเป็นสีม่วงเข้ากับผี */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .kru-title { color: #7b1fa2; margin-bottom: 5px; }
+  .kru-instruction { color: #555; font-size: 16px; margin-bottom: 15px; }
+  
+  /* สไตล์ตารางเขาวงกต - เน้นความอ่านง่ายเพื่อเด็ก ป.1 */
+  .maze-table {
+    margin: 20px auto;
+    border-collapse: separate;
+    border-spacing: 6px;
+  }
+  .maze-cell {
+    width: 52px;
+    height: 52px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: 500; /* ความหนาระดับพอดี แยก ด ต ฎ ฏ ชัดเจน */
+    cursor: pointer;
+    background-color: #fff;
+    user-select: none;
+    transition: all 0.2s;
+    color: #333;
+  }
+  .maze-cell:hover { background-color: #f5f5f5; }
+  /* ช่องที่เดินผ่านมาแล้ว */
+  .maze-cell.visited { background-color: #e1bee7; border-color: #ba68c8; }
+  /* ช่องปัจจุบันที่ผี่อยู่ */
+  .maze-cell.ghost-here { font-size: 28px; background-color: #f3e5f5; border-color: #9c27b0; }
+  .maze-cell.end { font-size: 28px; background-color: #e8f5e9; }
+
+  /* ปุ่มควบคุม */
+  .btn-group { margin-top: 20px; }
+  .kru-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    margin: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-reset { background-color: #f44336; color: white; }
+  .btn-random { background-color: #2196f3; color: white; }
+  .kru-btn:hover { opacity: 0.9; transform: scale(1.05); }
+  
+  /* กล่องแจ้งเตือนสีแดงด้านล่าง ป้องกันภาษาต่างดาว */
+  #kru-alert {
+    font-size: 18px;
+    font-weight: bold;
+    color: #cc0000;
+    margin-top: 15px;
+    min-height: 25px;
+  }
+  
+  /* แสดงผลคะแนน */
+  #score-board {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 15px;
+    color: #2e7d32;
+    display: none;
+  }
+</style>
+
+<div class="kru-container">
+  <h2 class="kru-title">👻 เกมใบงานเขาวงกต: พาคุณผีไปส่งถุงข้าวสาร</h2>
+  <p class="kru-instruction"><strong>วิธีเล่น:</strong> คลิกช่อง <strong>"อักษรสูง" (ผีฝากถุงข้าวสารให้ฉัน)</strong> ที่อยู่ติดกับตัวผีเพื่อนำทางไปหาถุงข้าวสาร 🌾</p>
+
+  <!-- ตารางเขาวงกต 8x8 -->
+  <table class="maze-table" id="maze"></table>
+
+  <!-- กล่องแสดงข้อความแจ้งเตือนเด็กๆ -->
+  <div id="kru-alert"></div>
+
+  <!-- ปุ่มฟังก์ชันใช้งาน -->
+  <div class="btn-group">
+    <button class="kru-btn btn-reset" onclick="resetMaze()">🔄 เริ่มเดินใหม่ตั้งแต่ต้น</button>
+    <button class="kru-btn btn-random" onclick="generateMaze()">🔀 สุ่มเปลี่ยนตัวอักษรใหม่</button>
+  </div>
+
+  <div id="score-board"></div>
+</div>
+
+<script>
+// คลังอักษรสามหมู่: ล็อกให้เส้นทางเดินเป็นอักษรสูงเท่านั้น (ข ฃ ฉ ฐ ถ ผ ฝ ศ ษ ส ห)
+const highLetters = ['ข', 'ฃ', 'ฉ', 'ฐ', 'ถ', 'ผ', 'ฝ', 'ศ', 'ษ', 'ส', 'ห'];
+const otherLetters = ['ก', 'จ', 'ฎ', 'ฏ', 'ด', 'ต', 'บ', 'ป', 'อ', 'ค', 'ง', 'ช', 'ซ', 'ญ', 'ย', 'น', 'ท', 'พ', 'ฟ', 'ม', 'ร', 'ล', 'ว'];
+
+// คลังรูปแบบเส้นทางเดินเขาวงกต 8x8 สุ่มระบบรูปทรงอัจฉริยะสไตล์คลังคำครูทุเรียน
+const pathTemplates = [
+  ["0,1", "1,1", "1,2", "1,3", "2,3", "2,4", "3,4", "3,5", "4,5", "4,6", "5,6", "6,6", "7,6"],
+  ["1,0", "2,0", "2,1", "2,2", "3,2", "4,2", "4,3", "5,3", "5,4", "5,5", "6,5", "7,5", "7,6"],
+  ["0,1", "0,2", "0,3", "1,3", "2,3", "3,3", "3,4", "3,5", "4,5", "5,5", "6,5", "6,6", "6,7"],
+  ["1,0", "1,1", "2,1", "2,2", "3,2", "3,3", "4,3", "4,4", "5,4", "5,5", "6,5", "6,6", "7,6"],
+  ["0,1", "0,2", "0,3", "0,4", "1,4", "2,4", "3,4", "4,4", "4,5", "4,6", "5,6", "6,6", "7,6"]
+];
+
+let currentPath = [];
+let ghostPos = { r: 0, c: 0 };
+let mazeData = {}; 
+
+function getRandomLetter(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function showAlert(message) {
+  const alertDiv = document.getElementById('kru-alert');
+  alertDiv.innerHTML = message;
+  setTimeout(() => {
+    if(alertDiv.innerHTML === message) alertDiv.innerHTML = '';
+  }, 3000);
+}
+
+function generateMaze() {
+  const table = document.getElementById('maze');
+  table.innerHTML = '';
+  document.getElementById('score-board').style.display = 'none';
+  document.getElementById('kru-alert').innerHTML = '';
+  ghostPos = { r: 0, c: 0 };
+  mazeData = {};
+
+  // ระบบ Dynamic สุ่มเลือกเส้นทางเพื่อความไม่ซ้ำซาก
+  currentPath = pathTemplates[Math.floor(Math.random() * pathTemplates.length)];
+
+  for (let r = 0; r < 8; r++) {
+    let row = table.insertRow();
+    for (let c = 0; c < 8; c++) {
+      let cell = row.insertCell();
+      cell.className = 'maze-cell';
+      cell.id = `cell-${r}-${c}`;
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      cell.addEventListener('click', function() {
+        moveGhost(parseInt(this.dataset.row), parseInt(this.dataset.col));
+      });
+
+      if (r === 0 && c === 0) {
+        cell.innerHTML = '👻';
+        cell.className += ' ghost-here';
+      } else if (r === 7 && c === 7) {
+        cell.innerHTML = '🌾';
+        cell.className += ' end';
+      } else {
+        // เช็กพิกัด: ถ้าอยู่ในเส้นทางหลักให้สุ่มอักษรสูง ถ้านอกเส้นทางให้สุ่มอักษรหมู่อื่น (กลาง/ต่ำ)
+        let letter = currentPath.includes(`${r},${c}`) ? getRandomLetter(highLetters) : getRandomLetter(otherLetters);
+        cell.innerHTML = letter;
+        mazeData[`${r},${c}`] = letter;
+      }
+    }
+  }
+}
+
+function moveGhost(targetR, targetC) {
+  if (targetR === ghostPos.r && targetC === ghostPos.c) return;
+
+  let rowDiff = Math.abs(targetR - ghostPos.r);
+  let colDiff = Math.abs(targetC - ghostPos.c);
+  let isAdjacent = (rowDiff + colDiff === 1);
+
+  if (!isAdjacent) {
+    showAlert("📢 คุณผีกระโดดข้ามช่องไม่ได้นะจ๊ะ ต้องเลือกช่องที่อยู่ติดกันจ้า");
+    return;
+  }
+
+  let isRice = (targetR === 7 && targetC === 7);
+  let targetLetter = mazeData[`${targetR},${targetC}`];
+  let isHighLetter = highLetters.includes(targetLetter);
+
+  if (isHighLetter || isRice) {
+    document.getElementById('kru-alert').innerHTML = '';
+    let oldCell = document.getElementById(`cell-${ghostPos.r}-${ghostPos.c}`);
+    oldCell.innerHTML = "";
+    oldCell.classList.remove('ghost-here');
+    oldCell.classList.add('visited');
+
+    ghostPos.r = targetR;
+    ghostPos.c = targetC;
+
+    let newCell = document.getElementById(`cell-${targetR}-${targetC}`);
+    if (isRice) {
+      newCell.innerHTML = '👻🌾';
+      newCell.classList.remove('end');
+      newCell.classList.add('ghost-here');
+      gameWin();
+    } else {
+      newCell.innerHTML = '👻';
+      newCell.classList.add('ghost-here');
+    }
+  } else {
+    showAlert(`❌ ตัวอักษร "${targetLetter}" ไม่ใช่อักษรสูง คุณผีเดินผ่านไม่ได้จ้า!`);
+  }
+}
+
+function gameWin() {
+  const scoreBoard = document.getElementById('score-board');
+  scoreBoard.innerHTML = `🏆 ยินดีด้วยจ้า! คุณผีได้รับถุงข้าวสารแล้ว <br> รับคะแนนเต็ม 10 / 10 คะแนน! 🎉`;
+  scoreBoard.style.display = 'block';
+  scoreBoard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetMaze() {
+  generateMaze();
+}
+
+window.onload = generateMaze;
+</script>
