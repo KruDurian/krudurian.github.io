@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมริ้วธงแสนสนุก ป.1 (ชุด 10 ข้อ)</title>
+    <style>
+        @import url('https://googleapis.com');
+
+        body {
+            font-family: 'Mitr', sans-serif;
+            background: linear-gradient(135deg, #fef08a 0%, #bbf7d0 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 720px;
+            width: 100%;
+            text-align: center;
+            border: 4px solid #f59e0b;
+        }
+
+        h1 {
+            color: #d97706;
+            font-size: 28px;
+            margin-top: 0;
+        }
+
+        .status-container {
+            display: flex;
+            justify-content: space-around;
+            font-size: 18px;
+            color: #b45309;
+            margin-bottom: 20px;
+            font-weight: bold;
+            background: #fffbeb;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .flag-rope {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            background: #fef3c7;
+            padding: 40px 20px;
+            border-radius: 16px;
+            border-bottom: 4px solid #d97706;
+            margin-bottom: 30px;
+            position: relative;
+            min-height: 90px;
+        }
+
+        .flag-rope::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 20px;
+            right: 20px;
+            height: 4px;
+            background: #78350f;
+            z-index: 1;
+        }
+
+        /* 🔺 สไตล์ธงรูปสามเหลี่ยม */
+        .flag-triangle {
+            width: 0;
+            height: 0;
+            border-left-style: solid;
+            border-left-color: transparent;
+            border-right-style: solid;
+            border-right-color: transparent;
+            border-top-style: solid;
+            border-top-color: #cbd5e1;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.2s;
+        }
+        .flag-triangle.flag-large { border-left-width: 28px; border-right-width: 28px; border-top-width: 65px; }
+        .flag-triangle.flag-small { border-left-width: 18px; border-right-width: 18px; border-top-width: 42px; margin-top: 14px; }
+
+        /* 🔲 สไตล์ธงรูปสี่เหลี่ยม */
+        .flag-square {
+            background-color: #cbd5e1;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.2s;
+            border-radius: 4px;
+        }
+        .flag-square.flag-large { width: 56px; height: 65px; }
+        .flag-square.flag-small { width: 36px; height: 42px; margin-top: 14px; }
+
+        /* สีพ่นบนรูปทรงสามเหลี่ยม (ใช้ border-top-color) */
+        .flag-triangle.flag-red { border-top-color: #ef4444; }
+        .flag-triangle.flag-blue { border-top-color: #3b82f6; }
+        .flag-triangle.flag-yellow { border-top-color: #f59e0b; }
+        .flag-triangle.flag-green { border-top-color: #10b981; }
+
+        /* สีพ่นบนรูปทรงสี่เหลี่ยม (ใช้ background-color) */
+        .flag-square.flag-red { background-color: #ef4444; }
+        .flag-square.flag-blue { background-color: #3b82f6; }
+        .flag-square.flag-yellow { background-color: #f59e0b; }
+        .flag-square.flag-green { background-color: #10b981; }
+
+        .flag-blank {
+            width: 50px;
+            height: 60px;
+            border: 3px dashed #d97706;
+            background: #fff;
+            border-radius: 4px;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #d97706;
+        }
+
+        .options-zone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 35px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            min-height: 110px;
+        }
+
+        .option-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 90px;
+        }
+        .option-item:hover {
+            transform: scale(1.1);
+        }
+
+        .btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 15px;
+        }
+
+        .feedback {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+            height: 35px;
+        }
+        .success { color: #10b981; }
+        .wrong { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🚩 เกมริ้วธงแสนสนุก ป.1 🚩</h1>
+    
+    <div class="status-container">
+        <div>ข้อที่: <span id="question-no">1</span> / 10</div>
+        <div>คะแนนสะสม: <span id="score">0</span> คะแนน</div>
+    </div>
+    
+    <p id="game-hint" style="color: #78350f; font-weight: bold; font-size: 18px;">💡 สังเกตริ้วธงดี ๆ แล้วเลือกผืนต่อไปให้ถูกต้องนะจ๊ะ!</p>
+
+    <div class="flag-rope" id="rope-container"></div>
+
+    <p style="font-weight: bold; color: #475569;">👇 คลิกเลือกรูปทรงที่ถูกต้องมาเติมในช่องว่าง 👇</p>
+    <div class="options-zone" id="options-container"></div>
+
+    <div class="feedback" id="feedback-msg"></div>
+    <button class="btn" id="next-btn" style="display: none;" onclick="advanceGame()">ข้อต่อไป ➡️</button>
+</div>
+
+<script>
+    let score = 0;
+    let questionCount = 1;
+    let correctAnswerIndex = 0; 
+    let questionData = []; 
+
+    const colorClasses = { 'แดง': 'flag-red', 'น้ำเงิน': 'flag-blue', 'เหลือง': 'flag-yellow', 'เขียว': 'flag-green' };
+
+    function generatePatternGame() {
+        const rope = document.getElementById('rope-container');
+        const feedback = document.getElementById('feedback-msg');
+        const nextBtn = document.getElementById('next-btn');
+        const hint = document.getElementById('game-hint');
+        
+        rope.innerHTML = '';
+        feedback.innerText = '';
+        nextBtn.style.display = 'none';
+        questionData = [];
+
+        document.getElementById('question-no').innerText = questionCount;
+
+        // สุ่มโหมดเกมรอบนี้: 0 = สี, 1 = ขนาด, 2 = รูปเรขาคณิต (สามเหลี่ยม/สี่เหลี่ยม)
+        const gameMode = Math.floor(Math.random() * 3);
+        let options = [];
+
+        if (gameMode === 0) {
+            // --- 🎨 โหมดความสัมพันธ์ของ "สี" ---
+            hint.innerText = "💡 สังเกต สี ของริ้วธงดี ๆ แล้วเลือกสีถัดไปให้ถูกต้องนะ!";
+            const allColors = ['แดง', 'น้ำเงิน', 'เหลือง', 'เขียว'];
+            const c1 = allColors.splice(Math.floor(Math.random() * allColors.length), 1)[0];
+            const c2 = allColors.splice(Math.floor(Math.random() * allColors.length), 1)[0];
+            
+            const repeatType = Math.floor(Math.random() * 2);
+            let pattern = (repeatType === 0) ? [c1, c2, c1, c2, c1, c2, c1, c2] : [c1, c1, c2, c1, c1, c2, c1, c1];
+            correctAnswerIndex = (repeatType === 0) ? 1 : 0;
+
+            for(let i=0; i<8; i++) {
+                questionData.push({ shape: 'triangle', color: pattern[i], size: 'large' });
+            }
+            options = [
+                { shape: 'triangle', color: c1, size: 'large', label: c1 },
+                { shape: 'triangle', color: c2, size: 'large', label: c2 }
+            ];
+
+        } else if (gameMode === 1) {
+            // --- 📏 โหมดความสัมพันธ์ของ "ขนาด" ---
+            hint.innerText = "💡 สังเกต ขนาด (เล็ก/ใหญ่) ของริ้วธงดี ๆ แล้วเลือกขนาดถัดไปนะ!";
+            const themeColor = ['แดง', 'น้ำเงิน', 'เหลือง', 'เขียว'][Math.floor(Math.random() * 4)];
+            
+            const repeatType = Math.floor(Math.random() * 2);
+            let sizePattern = (repeatType === 0) ? ['large', 'small', 'large', 'small', 'large', 'small', 'large', 'small'] : ['large', 'large', 'small', 'large', 'large', 'small', 'large', 'large'];
+            correctAnswerIndex = (repeatType === 0) ? 1 : 0;
+
+            for(let i=0; i<8; i++) {
+                questionData.push({ shape: 'triangle', color: themeColor, size: sizePattern[i] });
+            }
+            options = [
+                { shape: 'triangle', color: themeColor, size: 'large', label: 'ผืนใหญ่' },
+                { shape: 'triangle', color: themeColor, size: 'small', label: 'ผืนเล็ก' }
+            ];
+        } else {
+            // --- 🔺🔲 โหมดความสัมพันธ์ของ "รูปเรขาคณิต" (สามเหลี่ยม/สี่เหลี่ยม) ---
+            hint.innerText = "💡 สังเกต รูปทรง (สามเหลี่ยม/สี่เหลี่ยม) ดี ๆ แล้วเลือกรูปทรงถัดไปนะ!";
+            const themeColor = ['แดง', 'น้ำเงิน', 'เหลือง', 'เขียว'][Math.floor(Math.random() * 4)];
+            
+            const repeatType = Math.floor(Math.random() * 2);
+            // 0 = สามเหลี่ยม-สี่เหลี่ยม-สามเหลี่ยม-สี่เหลี่ยม, 1 = สามเหลี่ยม-สามเหลี่ยม-สี่เหลี่ยม
+            let shapePattern = (repeatType === 0) ? ['triangle', 'square', 'triangle', 'square', 'triangle', 'square', 'triangle', 'square'] : ['triangle', 'triangle', 'square', 'triangle', 'triangle', 'square', 'triangle', 'triangle'];
+            correctAnswerIndex = (repeatType === 0) ? 1 : 0;
+
+            for(let i=0; i<8; i++) {
+                questionData.push({ shape: shapePattern[i], color: themeColor, size: 'large' });
+            }
+            options = [
+                { shape: 'triangle', color: themeColor, size: 'large', label: 'สามเหลี่ยม' },
+                { shape: 'square', color: themeColor, size: 'large', label: 'สี่เหลี่ยม' }
+            ];
+        }
+
+        renderRopeFlags();
+        renderOptionsZone(options);
+    }
+    function renderRopeFlags() {
+        const rope = document.getElementById('rope-container');
+        
+        for (let i = 0; i < 7; i++) {
+            const flagDiv = document.createElement('div');
+            const item = questionData[i];
+            const shapeClass = item.shape === 'triangle' ? 'flag-triangle' : 'flag-square';
+            const sizeClass = item.size === 'large' ? 'flag-large' : 'flag-small';
+            
+            flagDiv.className = `flag ${shapeClass} ${sizeClass} ${colorClasses[item.color]}`;
+            rope.appendChild(flagDiv);
+        }
+
+        const blankBox = document.createElement('div');
+        blankBox.className = 'flag-blank';
+        blankBox.innerText = '?';
+        blankBox.id = 'target-blank';
+        rope.appendChild(blankBox);
+    }
+
+    function renderOptionsZone(options) {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        options.forEach((opt, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-item';
+            
+            const flagVisual = document.createElement('div');
+            const shapeClass = opt.shape === 'triangle' ? 'flag-triangle' : 'flag-square';
+            const sizeClass = opt.size === 'large' ? 'flag-large' : 'flag-small';
+            flagVisual.className = `flag ${shapeClass} ${sizeClass} ${colorClasses[opt.color]}`;
+            
+            const textLabel = document.createElement('span');
+            textLabel.innerText = opt.label;
+            textLabel.style.fontWeight = 'bold';
+            textLabel.style.marginTop = '15px';
+            textLabel.style.color = '#334155';
+
+            optionDiv.appendChild(flagVisual);
+            optionDiv.appendChild(textLabel);
+            
+            optionDiv.onclick = () => selectAnswer(index);
+            container.appendChild(optionDiv);
+        });
+    }
+
+    function selectAnswer(selectedIndex) {
+        const feedback = document.getElementById('feedback-msg');
+        const nextBtn = document.getElementById('next-btn');
+        const blankBox = document.getElementById('target-blank');
+
+        if (selectedIndex === correctAnswerIndex) {
+            feedback.innerHTML = '<span class="success">🎉 เก่งมากจ้า! เติมแบบรูปได้ถูกต้องแล้ว</span>';
+            
+            const finalTarget = questionData[7]; 
+            const shapeClass = finalTarget.shape === 'triangle' ? 'flag-triangle' : 'flag-square';
+            const sizeClass = finalTarget.size === 'large' ? 'flag-large' : 'flag-small';
+            
+            blankBox.className = `flag ${shapeClass} ${sizeClass} ${colorClasses[finalTarget.color]}`;
+            blankBox.innerText = '';
+            blankBox.style.border = 'none';
+            blankBox.style.background = 'transparent';
+
+            score += 10;
+            document.getElementById('score').innerText = score;
+            nextBtn.style.display = 'inline-block';
+            
+            if(questionCount === 10) {
+                nextBtn.innerText = "ดูสรุปคะแนน 🏆";
+            }
+            disableOptions();
+        } else {
+            feedback.innerHTML = '<span class="wrong">❌ ยังไม่ถูกนะจ๊ะ ลองสังเกตความสัมพันธ์ใหม่อีกทีนะ</span>';
+            blankBox.style.borderColor = '#ef4444';
+            setTimeout(() => { blankBox.style.borderColor = '#d97706'; }, 1000);
+        }
+    }
+
+    function disableOptions() {
+        const options = document.querySelectorAll('.option-item');
+        options.forEach(opt => {
+            opt.onclick = null;
+            opt.style.opacity = '0.3';
+            opt.style.cursor = 'default';
+        });
+    }
+
+    function advanceGame() {
+        if (questionCount < 10) {
+            questionCount++;
+            generatePatternGame();
+        } else {
+            // จบเกม แสดงผลคะแนนรวมทั้งหมด
+            const container = document.getElementsByClassName('game-container')[0];
+            container.innerHTML = `
+                <h1 style="font-size: 36px;">🏆 ยินดีด้วยเล่นครบ 10 ข้อแล้ว 🏆</h1>
+                <p style="font-size: 24px; font-weight: bold; color: #059669; margin: 30px 0;">
+                   เด็กๆ ได้คะแนนรวมทั้งหมด: <span style="font-size: 48px;">${score}</span> / 100 คะแนน
+                </p>
+                <button class="btn" style="padding: 15px 40px; font-size: 22px;" onclick="window.location.reload()">เล่นใหม่อีกครั้ง 🔄</button>
+            `;
+        }
+    }
+
+    generatePatternGame();
+</script>
+</body>
+</html>
