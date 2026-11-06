@@ -1,0 +1,242 @@
+<!-- [ส่วนที่ 1/3] สไตล์การจัดหน้าแอปพลิเคชัน ตัวเลือกจานสี และการตั้งค่าสำหรับการสั่งพิมพ์ลงกระดาษ -->
+<style>
+    .kd-app-container { font-family: 'Sarabun', sans-serif; line-height: 1.8; color: #2c3e50; max-width: 800px; margin: 0 auto; padding: 10px; }
+    .kd-header { background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); padding: 25px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    
+    /* จานสีพู่กัน */
+    .palette-box { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+    .brush-btn { padding: 12px 24px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; border: 3px solid transparent; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .b-red { background-color: #ff7675; } .b-green { background-color: #55efc4; color: #2d3436; } .b-blue { background-color: #74b9ff; }
+    .brush-btn.active { border-color: #2d3436; transform: scale(1.08); box-shadow: 0 0 12px rgba(0,0,0,0.25); }
+    
+    /* ปุ่มควบคุมระบบ */
+    .control-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+    .kd-btn { padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; border: none; color: white; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn-shuffle { background-color: #e67e22; } .btn-check { background-color: #9b59b6; } .btn-print { background-color: #00cec9; } .btn-reset { background-color: #636e72; }
+    
+    /* กล่องแสดงคะแนน */
+    .score-board { display: none; background-color: #edf2f7; border: 2px solid #cbd5e0; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: bold; }
+
+    /* คลังไข่คำศัพท์ */
+    .egg-playground { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+    .interactive-egg { background: #ffffff; border: 2px dashed #b2bec3; border-radius: 40px; padding: 25px 5px; text-align: center; font-size: 26px; font-weight: bold; cursor: pointer; transition: all 0.2s; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    .interactive-egg span { display: block; font-size: 12px; color: #b2bec3; font-weight: normal; margin-top: 4px; }
+    .interactive-egg .feedback-icon { font-size: 15px; margin-top: 4px; display: none; font-weight: bold; }
+
+    /* คลาสสีระบายค้างหลังโดนจิ้ม */
+    .painted-red { background-color: #ffebeb !important; border-color: #ff7675 !important; color: #c0392b !important; }
+    .painted-green { background-color: #f0fdf4 !important; border-color: #55efc4 !important; color: #00b894 !important; }
+    .painted-blue { background-color: #eff6ff !important; border-color: #74b9ff !important; color: #0984e3 !important; }
+
+    /* 🖨️ ระบบปรับหน้าตาใบงานอัตโนมัติสำหรับพิมพ์ลงกระดาษระบายสีไม้ */
+   
+    @media print {
+        /* 👇 บังคับให้เบราว์เซอร์สั่งพิมพ์เป็นแนวตั้งเสมอ */
+        @page { size: portrait; margin: 15mm; } 
+        
+        body { background: white; color: black; }
+        .kd-header, .palette-box, .control-row, .no-print, .feedback-icon { display: none !important; }
+        .kd-app-container { max-width: 100%; padding: 0; margin: 0; }
+        
+        /* ปรับไข่คำศัพท์ให้เรียงเป็น 3 คอลัมน์แนวนอนแบบพอดีกับกระดาษ A4 แนวตั้ง */
+        .egg-playground { grid-template-columns: repeat(3, 1fr) !important; gap: 20px !important; margin-top: 30px !important; }
+        .interactive-egg { border: 2px dashed #000000 !important; background: transparent !important; color: #000000 !important; padding: 25px 10px !important; border-radius: 50px !important; box-shadow: none !important; }
+        .print-header-area { display: block !important; text-align: center; margin-bottom: 30px; }
+    }
+
+
+    @media screen and (max-width: 600px) {
+        .kd-header h1 { font-size: 20px !important; }
+        .palette-box, .control-row { flex-direction: column; gap: 8px; align-items: center; }
+        .brush-btn, .kd-btn { width: 90%; text-align: center; justify-content: center; }
+        .egg-playground { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .interactive-egg { font-size: 22px !important; padding: 18px 5px !important; }
+    }
+</style>
+
+<div class="kd-app-container" id="kd-vowel-app">
+    
+    <!-- ส่วนหัวที่จะแสดงเฉพาะเวลาสั่งพิมพ์ใส่กระดาษขาวดำจริงเท่านั้น -->
+    <div class="print-header-area" style="display: none; border: 2px solid #000; padding: 15px; text-align: center;">
+        <h1 style="font-size: 24px; margin: 0 0 5px 0;">ใบงานระบายสีแยกแยะกลุ่มคำประสม สระอา / สระอี / สระอู (คลังคำแบบสุ่ม)</h1>
+        <p style="font-size: 15px; margin: 0;">ชื่อ-นามสกุล:........................................................................... เลขที่:.............. ชั้น:..............</p>
+        <p style="font-size: 13px; margin: 8px 0 0 0; font-weight: bold;">คำสั่ง: ให้นักเรียนใช้สีไม้ระบายสีไข่คำศัพท์ สีแดง (สระอา), สีเขียว (สระอี), สีน้ำเงิน (สระอู) ให้ถูกต้องสอดคล้องกัน</p>
+    </div>
+
+    <header class="kd-header">
+        <span style="background-color: #27ae60; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 20px; display: inline-block; margin-bottom: 8px;">นวัตกรรมใหม่ล่าสุด: คลังคละคำ 50 คำ ระบบสุ่มแสดงผล 12 คำอัจฉริยะ</span>
+        <h1 style="font-size: 24px; color: #2c3e50; font-weight: bold; margin: 0 0 5px 0;">แอปใบงานเกมระบายสีสระ อา อี อู สุ่มศัพท์ ป.1 ออนไลน์</h1>
+        <p style="font-size: 15px; color: #4b5563; margin: 0;">คลิกเลือกพู่กันสี แล้วไประบายลงบนไข่คำศัพท์ กดสลับเพื่อเปลี่ยนชุดคำศัพท์ใหม่จากคลัง 50 คำได้ทันที!</p>
+    </header>
+<!--1-->
+<!-- [ส่วนที่ 2/3] แผงปุ่มจานสี แผงปุ่มควบคุม และแกนระบบ JavaScript สุ่มตัวอย่างคลังคำ 50 คำ -->
+    <div class="palette-box no-print">
+        <button class="brush-btn b-red active" onclick="setBrush('red')">🖌 พู่กันสีแดง (คำสระอา)</button>
+        <button class="brush-btn b-green" onclick="setBrush('green')">🖌 พู่กันสีเขียว (คำสระอี)</button>
+        <button class="brush-btn b-blue" onclick="setBrush('blue')">🖌 พู่กันสีน้ำเงิน (คำสระอู)</button>
+    </div>
+
+    <div class="control-row no-print">
+        <button class="kd-btn btn-shuffle" onclick="generateRandomEggs()">🔀 กดสุ่มคำศัพท์ชุดใหม่ (เปลี่ยนคำ)</button>
+        <button class="kd-btn btn-check" onclick="checkAnswers()">🔍 ตรวจคำตอบรับคะแนน</button>
+        <button class="kd-btn btn-reset" onclick="resetCurrentColors()">🔄 ล้างสีเพื่อระบายใหม่</button>
+        <button class="kd-btn btn-print" onclick="window.print();">🖨️ สั่งพิมพ์ใบงานนี้ลงกระดาษ</button>
+    </div>
+
+    <div class="score-board" id="score-display"></div>
+
+    <!-- โซนกระดานไข่คำศัพท์ที่จะถูก JavaScript ดึงมาแสดงแบบ Dynamic -->
+    <div class="egg-playground" id="egg-grid-box"></div>
+
+    <script>
+        // 📦 คลังคำศัพท์แน่นๆ ทั้งหมด 50 คำ ตรงตามกรอบหลักสูตร สพฐ. ป.1
+        const vowelBank = [
+            // กลุ่มสระอา (20 คำ)
+            { word: "ตา", vowel: "aa", text: "ต + อา" }, { word: "ขา", vowel: "aa", text: "ข + อา" },
+            { word: "กา", vowel: "aa", text: "ก + อา" }, { word: "ยา", vowel: "aa", text: "ย + อา" },
+            { word: "ฝา", vowel: "aa", text: "ฝ + อา" }, { word: "มา", vowel: "aa", text: "ม + อา" },
+            { word: "หา", vowel: "aa", text: "ห + อา" }, { word: "ทา", vowel: "aa", text: "ท + อา" },
+            { word: "พา", vowel: "aa", text: "พ + อา" }, { word: "ลา", vowel: "aa", text: "ล + อา" },
+            { word: "ชา", vowel: "aa", text: "ช + อา" }, { word: "นา", vowel: "aa", text: "น + อา" },
+            { word: "อา", vowel: "aa", text: "อ + อา" }, { word: "รา", vowel: "aa", text: "ร + อา" },
+            { word: "วา", vowel: "aa", text: "ว + อา" }, { word: "ซา", vowel: "aa", text: "ซ + อา" },
+            { word: "งา", vowel: "aa", text: "ง + อา" }, { word: "คา", vowel: "aa", text: "ค + อา" },
+            { word: "ศา", vowel: "aa", text: "ศ + อา" }, { word: "หงา", vowel: "aa", text: "หง + อา" },
+
+            // กลุ่มสระอี (15 คำ)
+            { word: "ดี", vowel: "ee", text: "ด + อี" }, { word: "ตี", vowel: "ee", text: "ต + อี" },
+            { word: "ผี", vowel: "ee", text: "ผ + อี" }, { word: "ชี", vowel: "ee", text: "ช + อี" },
+            { word: "มี", vowel: "ee", text: "ม + อี" }, { word: "ปี", vowel: "ee", text: "ป + อี" },
+            { word: "สี", vowel: "ee", text: "ส + อี" }, { word: "รี", vowel: "ee", text: "ร + อี" },
+            { word: "ที", vowel: "ee", text: "ท + อี" }, { word: "วี", vowel: "ee", text: "ว + อี" },
+            { word: "คี", vowel: "ee", text: "ค + อี" }, { word: "นี", vowel: "ee", text: "น + อี" },
+            { word: "ซี", vowel: "ee", text: "ซ + อี" }, { word: "พี", vowel: "ee", text: "พ + อี" },
+            { word: "ฝี", vowel: "ee", text: "ฝ + อี" },
+
+            // กลุ่มสระอู (15 คำ)
+            { word: "ปู", vowel: "oo", text: "ป + อู" }, { word: "หู", vowel: "oo", text: "ห + อู" },
+            { word: "ดู", vowel: "oo", text: "ด + อู" }, { word: "รู", vowel: "oo", text: "ร + อู" },
+            { word: "งู", vowel: "oo", text: "ง + อู" }, { word: "ฟู", vowel: "oo", text: "ฟ + อู" },
+            { word: "ชู", vowel: "oo", text: "ช + อู" }, { word: "ทู", vowel: "oo", text: "ท + อู" },
+            { word: "พู", vowel: "oo", text: "พ + อู" }, { word: "คู", vowel: "oo", text: "ค + อู" },
+            { word: "บู", vowel: "oo", text: "บ + อู" }, { word: "อู", vowel: "oo", text: "อ + อู" },
+            { word: "ถู", vowel: "oo", text: "ถ + อู" }, { word: "พรู", vowel: "oo", text: "พรู + อู" },
+            { word: "หมู", vowel: "oo", text: "หม + อู" }
+        ];
+
+        let currentBrush = 'red';
+
+        function setBrush(color) {
+            currentBrush = color;
+            document.querySelectorAll('.brush-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.b-' + color).classList.add('active');
+        }
+
+        // ฟังก์ชันระบบสุ่มคัดเลือกและกระจายคำศัพท์ 12 คำแบบไม่ซ้ำเดิม
+        function generateRandomEggs() {
+            const container = document.getElementById('egg-grid-box');
+            container.innerHTML = ''; 
+            document.getElementById('score-display').style.display = 'none';
+
+            // โคลนคลังคำศัพท์เพื่อสุ่มสับไพ่
+            let shuffledBank = [...vowelBank].sort(() => 0.5 - Math.random());
+            // ดึงมาแสดงผลเพียง 12 คำจากคลังทั้งหมด
+            let selectedWords = shuffledBank.slice(0, 12);
+
+            selectedWords.forEach((item, index) => {
+                const eggHTML = `
+                    <div class="interactive-egg" data-vowel="${item.vowel}" onclick="paintEgg(this)">
+                        ${item.word}<span>[${item.text}]</span>
+                        <div class="feedback-icon"></div>
+                    </div>
+                `;
+                container.innerHTML += eggHTML;
+            });
+        }
+
+        function paintEgg(eggElement) {
+            eggElement.classList.remove('painted-red', 'painted-green', 'painted-blue');
+            eggElement.setAttribute('data-user-color', currentBrush);
+            eggElement.classList.add('painted-' + currentBrush);
+        }
+
+        function checkAnswers() {
+            let correctCount = 0;
+            const eggs = document.querySelectorAll('.interactive-egg');
+            
+            eggs.forEach(egg => {
+                const answer = egg.getAttribute('data-vowel');
+                const userColor = egg.getAttribute('data-user-color');
+                const icon = egg.querySelector('.feedback-icon');
+                icon.style.display = 'block';
+                
+                let correctColor = (answer === 'aa' && userColor === 'red') || 
+                                   (answer === 'ee' && userColor === 'green') || 
+                                   (answer === 'oo' && userColor === 'blue');
+
+                if (correctColor) {
+                    correctCount++;
+                    icon.innerHTML = '✅ ถูกต้อง';
+                    icon.style.color = '#27ae60';
+                } else {
+                    let hint = answer === 'aa' ? 'ต้องสีแดง 🔴' : answer === 'ee' ? 'ต้องสีเขียว 🟢' : 'ต้องสีน้ำเงิน 🔵';
+                    icon.innerHTML = `❌ ผิด (${hint})`;
+                    icon.style.color = '#e74c3c';
+                }
+            });
+            
+            const scoreBoard = document.getElementById('score-display');
+            scoreBoard.style.display = 'block';
+            scoreBoard.innerHTML = `📊 ตรวจสอบเสร็จสิ้น: คุณทำถูกทั้งหมด ${correctCount} จาก 12 ข้อ! ` + 
+                                   (correctCount === 12 ? '🏆 ยอดเยี่ยมมากค่ะ ถูกต้องครบทุกข้อ!' : '💪 ลองสลับเปลี่ยนชุดคำศัพท์ใหม่เพื่อฝึกฝนเพิ่มความแม่นยำขึ้นนะเด็กๆ');
+        }
+
+        function resetCurrentColors() {
+            const eggs = document.querySelectorAll('.interactive-egg');
+            eggs.forEach(egg => {
+                egg.classList.remove('painted-red', 'painted-green', 'painted-blue');
+                egg.removeAttribute('data-user-color');
+                egg.querySelector('.feedback-icon').style.display = 'none';
+            });
+            document.getElementById('score-display').style.display = 'none';
+        }
+
+        // สั่งให้แอปเปิดตัวและสุ่มคำศัพท์ชุดแรกขึ้นมาโชว์ทันทีเมื่อโหลดหน้าเว็บเพจสำเร็จ
+        window.onload = generateRandomEggs;
+    </script>
+<!--2-->
+<!-- [ส่วนที่ 3/3] ข้อมูลบทความวิชาการเพื่อทำ On-page SEO จับคู่คำค้นหาสำคัญเพื่อช่วยดันอันดับท้ายหน้าบล็อกครูทุเรียน -->
+    <hr class="no-print" style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+    <footer class="seo-content-section no-print" style="font-size: 15px; color: #475569; line-height: 1.8;">
+        
+        <h2 style="font-size: 20px; color: #1e293b; font-weight: bold; margin-bottom: 10px;">
+            นวัตกรรมคลังสื่อการสอน ป.1: ใบงานระบายสีออนไลน์ สระอา สระอี สระอู สุ่มศัพท์ 50 คำ
+        </h2>
+        <p style="margin-bottom: 15px;">
+            ยินดีต้อนรับสู่มิติใหม่แห่งการจัดการเรียนรู้วิชาภาษาไทยพื้นฐาน โดย คลังใบงานครูทุเรียน (KruDurian) เราได้อัปเกรดระบบจัดทำ <strong>ใบงานระบายสีแยกแยะคำประสม สระอา สระอี สระอู ชั้น ป.1</strong> เวอร์ชันใหม่ล่าสุดที่มาพร้อมกับฟังก์ชันคลังคำศัพท์ขนาดใหญ่รวมกว่า 50 คำ และทำงานร่วมกับระบบสมาร์ตสคริปต์เพื่อทำการสุ่มดึงคำศัพท์ (Random Selection) มาจัดชุดเป็นแบบฝึกหัดครั้งละ 12 คำแบบไม่ซ้ำกัน สื่อการสอนแบบยืดหยุ่นอินเตอร์แอคทีฟชิ้นนี้ ออกแบบขึ้นมาเพื่อแก้ไขปัญหาทักษะการเรียนรู้เด็กปฐมวัยตามหลักสูตรแกนกลาง สพฐ. ของกระทรวงศึกษาธิการ เพื่อให้คุณครูและผู้ปกครองนำไปใช้เป็นสื่อสู้ปัญหาเด็กจำสระสับสนและอ่านเขียนไม่ได้ผลดียิ่งขึ้นครับ
+        </p>
+
+        <h3 style="font-size: 18px; color: #1e293b; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">
+            วิเคราะห์คลังคำศัพท์ 50 คำพื้นฐานที่เด็กปฐมวัย ป.1 ต้องรู้
+        </h3>
+        <p style="margin-bottom: 12px;">ในตัวแอปพลิเคชันเวอร์ชันโครงสร้างนี้ มีการคัดกรองคำประสมสระเสียงยาวไม่มีตัวสะกดที่เข้าใจง่ายและสอดคล้องกับพฤติกรรมการออกเสียงของเด็กเล็ก โดยแยกแยะหมวดหมู่ทางสถิติไว้ดังนี้:</p>
+        <ul style="padding-left: 20px; margin-bottom: 20px;">
+            <li style="margin-bottom: 6px;"><strong>หมวดคำศัพท์สระอา (20 คำ):</strong> มุ่งเน้นคำพื้นฐานและคำเชื่อมโยงอวัยวะร่างกายรอบตัว เช่น ตา, ขา, กา, ยา, ฝา, มา, หา, ชา, นา ซึ่งใช้รูปสระอาวางไว้ตามหลังพยัญชนะต้น</li>
+            <li style="margin-bottom: 6px;"><strong>หมวดคำศัพท์สระอี (15 คำ):</strong> รวมกลุ่มคำที่เขียนวางไว้ด้านบนพยัญชนะต้น เช่น ดี, ตี, ผี, ชี, มี, ปี, สี เพื่อให้เด็กคุ้นชินกับการกวาดสายตามองตำแหน่งด้านบน</li>
+            <li style="margin-bottom: 6px;"><strong>หมวดคำศัพท์สระอู (15 คำ):</strong> ประกอบด้วยคำยอดนิยมที่มีสระอูเขียนกำกับไว้ใต้พยัญชนะต้นอย่างชัดเจน เช่น ปู, หู, ดู, รู, งู, ถู รวมถึงคำที่มีอักษรควบกล้ำระดับพื้นฐานเพื่อให้เกิดการท้าทายความคิดทางภาษา</li>
+        </ul>
+
+        <h3 style="font-size: 18px; color: #1e293b; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">
+            ข้อดีของการนำใบงานสุ่มคำภาษาไทยออนไลน์ไปใช้สั่งพิมพ์และคัดลายมือ
+        </h3>
+        <p style="margin-bottom: 15px;">
+            จุดเด่นที่แตกต่างของระบบจาก <a href="https://blogspot.com" style="color: #e67e22; text-decoration: none; font-weight: bold;">KruDurian</a> คือการทำงานประสานกันระหว่างออนไลน์และออฟไลน์ (Hybrid Worksheets) เมื่อคุณครูหรือผู้ปกครองเปิดใช้งานและต้องการใบงานรูปแบบกระดาษ เพียงแค่กดปุ่มสุ่มคำเพื่อจัดชุดคำศัพท์ที่ต้องการ จากนั้นกดปุ่ม <em>"สั่งพิมพ์ใบงานกระดาษ"</em> ตัวระบบจะเปลี่ยนสไตล์กรอบไข่คำศัพท์และซ่อนสีสันออนไลน์ทั้งหมดอัตโนมัติ ช่วยให้ได้แผ่นแบบฝึกหัดขาวดำคลาสสิกที่สะอาดตา มีช่องให้พิมพ์สลักชื่อ เลขที่ ชั้นเรียนอย่างสมบูรณ์แบบ เหมาะอย่างยิ่งสำหรับการจัดกิจกรรมระบายสีไม้ในห้องเรียนเพื่อสะสมคะแนนวิชาภาษาไทยอย่างยั่งยืนครับ
+        </p>
+
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 30px;">
+            คลังสื่อการสอนและใบงานอินเตอร์แอคทีฟภาษาไทยระดับประถมปฐมวัย สพฐ. โดย คลังใบงานครูทุเรียน (KruDurian)
+        </p>
+    </footer>
+
+</div>
