@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมสามเหลี่ยมคำศัพท์</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .game-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #e74c3c;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .status-board {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 25px;
+            background: #ecf0f1;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .triangle-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        .triangle-bg {
+            width: 0;
+            height: 0;
+            border-left: 120px solid transparent;
+            border-right: 120px solid transparent;
+            border-bottom: 200px solid #3498db;
+            position: absolute;
+            top: 50px;
+            left: 40px;
+            z-index: 1;
+            filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.15));
+        }
+
+        .word-btn {
+            position: absolute;
+            z-index: 2;
+            padding: 12px 24px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #ffffff;
+            border: 3px solid #2980b9;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .word-btn:active {
+            transform: scale(0.95);
+        }
+
+        #top-btn {
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #bottom-left-btn {
+            bottom: 10px;
+            left: -10px;
+        }
+
+        #bottom-right-btn {
+            bottom: 10px;
+            right: -10px;
+        }
+
+        .feedback {
+            margin-top: 30px;
+            font-size: 22px;
+            font-weight: bold;
+            height: 30px;
+        }
+
+        .correct { color: #2ecc71; }
+        .wrong { color: #e74c3c; }
+
+        .result-screen {
+            display: none;
+        }
+
+        .restart-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .restart-btn:hover { background-color: #27ae60; }
+    </style>
+</head>
+<body>
+
+    <div class="game-box" id="game-screen">
+        <h1>🔺 เกมสามเหลี่ยมคำศัพท์ 🔺</h1>
+        <div class="subtitle">คำใดไม่ใช่คำควบกล้ำด้วย ร เรือ</div>
+        
+        <div class="status-board">
+            <div>ข้อที่: <span id="question-number">1</span>/20</div>
+            <div>คะแนน: <span id="score">0</span></div>
+        </div>
+
+        <div class="triangle-container">
+            <div class="triangle-bg"></div>
+            <button class="word-btn" id="top-btn" onclick="checkAnswer(this)"></button>
+            <button class="word-btn" id="bottom-left-btn" onclick="checkAnswer(this)"></button>
+            <button class="word-btn" id="bottom-right-btn" onclick="checkAnswer(this)"></button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="game-box result-screen" id="result-screen">
+        <h2>🎉 จบเกมแล้วครับเด็ก ๆ! 🎉</h2>
+        <p style="font-size: 22px; color: #2c3e50;">คะแนนรวมที่ได้: <strong style="color: #e74c3c;" id="final-score">0</strong> เต็ม 20 คะแนน</p>
+        <div id="evaluation-msg" style="font-size: 18px; margin-bottom: 20px; font-weight: bold;"></div>
+        <button class="restart-btn" onclick="resetGame()">เล่นอีกครั้ง 🔄</button>
+    </div>
+
+    <script>
+        // 1. คลังคำควบกล้ำ ร เรือ
+        const rClusterWords = [
+            "กรง", "กรอง", "กรวด", "กร่อน", "กรีด", "กราม", "ไกร", "กรน", "กรอบแกรบ", "กรีดกราย", 
+            "เกรอะกรัง", "เกรียวกราว", "กระจก", "กระจุย", "กระดิ่ง", "กระดุม", "กระโดด", "กระต่าย", 
+            "กระถิน", "กระเทียม", "กระเบื้อง", "กระป๋อง", "กระเป๋า", "กระโปรง", "กระรอก", "ตะกร้า",
+            "ครู", "ใคร", "ใคร่", "ครัว", "ครับ", "ครัน", "โครง", "ครก", "คราว", "ครอก", 
+            "ครื้นเครง", "โครมคราม", "ครวญคราง", "ครั้งคราว", "ครึกโครม", "ครอบครัว",
+            "ตรี", "ตรา", "ตรง", "โปรด", "โปรย", "แปรง", "ปรุง", "ปรับ", "โปร่ง", "ปรับปรุง", 
+            "โปรดปราน", "ปราดเปรียว", "พราว", "แพรว", "แพร่", "พระ", "เพราะ", "พริก", "พร้อม", 
+            "พรั่ง", "พรวด", "พราย", "พรุน", "พรั่งพร้อม", "พร้อมเพรียง", "โพรง", "ขรุขระ", 
+            "ตะไคร้", "โกรธกริ้ว", "เกรี้ยวกราด", "กราบพระ"
+        ];
+
+        // 2. คลังคำหลอก (ไม่ใช่คำควบกล้ำ ร เรือ)
+        const fakeWords = [
+            "ตลาด", "ตลอด", "ขนม", "อร่อย", "ปลูก", "กล่อง", "คลอง", "ขวาน", "กวาง", "เพลง", 
+            "จริง", "สร้าง", "ทรง", "ทราบ", "โทร", "สรุป", "สนาม", "สนุก", "สมอง", "ฉลาม"
+        ];
+
+        let score = 0;
+        let currentQuestion = 1;
+        let correctWordInRound = "";
+        let isAnswered = false;
+
+        function startGame() {
+            if (currentQuestion > 20) {
+                showResults();
+                return;
+            }
+
+            isAnswered = false;
+            document.getElementById('question-number').innerText = currentQuestion;
+            document.getElementById('feedback').className = "feedback";
+            document.getElementById('feedback').innerText = "";
+
+            // สุ่มคำควบกล้ำแท้มา 2 คำแบบไม่ให้ซ้ำกัน
+            let chosenCorrect = [];
+            while(chosenCorrect.length < 2) {
+                let word = rClusterWords[Math.floor(Math.random() * rClusterWords.length)];
+                if(!chosenCorrect.includes(word)) {
+                    chosenCorrect.push(word);
+                }
+            }
+
+            // สุ่มคำที่ไม่ใช่คำควบกล้ำ ร เรือ มา 1 คำ
+            let chosenFake = fakeWords[Math.floor(Math.random() * fakeWords.length)];
+            correctWordInRound = chosenFake; 
+
+            // รวมคำเป็นกลุ่มเดียวกัน
+            let allThreeWords = [chosenCorrect[0], chosenCorrect[1], chosenFake];
+            
+            // สุ่มสลับตำแหน่งอย่างสมบูรณ์แบบ (Fisher-Yates Shuffle) เพื่อกระจายคำตอบไปอยู่ด้านบนบ้าง
+            for (let i = allThreeWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allThreeWords[i], allThreeWords[j]] = [allThreeWords[j], allThreeWords[i]];
+            }
+
+            // ดึงข้อความจากอาร์เรย์รายตัวส่งไปที่แต่ละปุ่มมุมสามเหลี่ยม
+            document.getElementById('top-btn').innerText = allThreeWords[0];
+            document.getElementById('bottom-left-btn').innerText = allThreeWords[1];
+            document.getElementById('bottom-right-btn').innerText = allThreeWords[2];
+        }
+
+        function checkAnswer(buttonElement) {
+            if(isAnswered) return;
+
+            const selectedWord = buttonElement.innerText;
+            const feedbackEl = document.getElementById('feedback');
+            isAnswered = true;
+
+            if (selectedWord === correctWordInRound) {
+                score++;
+                document.getElementById('score').innerText = score;
+                feedbackEl.innerText = "เก่งมาก! ถูกต้องครับ 🎉";
+                feedbackEl.className = "feedback correct";
+            } else {
+                feedbackEl.innerText = `ยังไม่ถูกน้า ตัวที่ใช่คือ "${correctWordInRound}" ❌`;
+                feedbackEl.className = "feedback wrong";
+            }
+            
+            currentQuestion++;
+            setTimeout(startGame, 1200);
+        }
+
+        function showResults() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            document.getElementById('final-score').innerText = score;
+
+            let msg = "";
+            if(score >= 18) msg = "🥇 สุดยอดไปเลย! หนูเชี่ยวชาญคำควบกล้ำมาก ๆ ครับ";
+            else if(score >= 14) msg = "🥈 เก่งมากครับ! ฝึกฝนอีกนิดจะเต็มร้อยแน่นอน";
+            else if(score >= 10) msg = "🥉 ผ่านเกณฑ์จ้า ลองกลับไปทบทวนคำควบกล้ำเพิ่มดูนะ";
+            else msg = "💪 เป็นกำลังใจให้นะครับ ลองกลับไปฝึกออกเสียงและเล่นใหม่อีกรอบนะ!";
+            
+            document.getElementById('evaluation-msg').innerText = msg;
+        }
+
+        function resetGame() {
+            score = 0;
+            currentQuestion = 1;
+            document.getElementById('score').innerText = score;
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('result-screen').style.display = 'none';
+            startGame();
+        }
+
+        // เริ่มต้นรันเกมทันทีเมื่อหน้าเว็บโหลดเสร็จ
+        window.onload = function() {
+            startGame();
+        };
+    </script>
+</body>
+</html>
