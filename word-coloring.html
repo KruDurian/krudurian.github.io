@@ -1,0 +1,209 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมระบายสีคำศัพท์ออนไลน์</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fdf6e2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+        }
+        .game-box {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #d35400;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .palette-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #fcfcfc;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+        }
+        .color-brush {
+            padding: 10px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, border-color 0.2s;
+        }
+        .color-brush:active { transform: scale(0.95); }
+        .brush-r { background-color: #ff9999; color: #b30000; }
+        .brush-l { background-color: #99ff99; color: #006600; }
+        .brush-w { background-color: #99ccff; color: #004080; }
+        .brush-h { background-color: #ffff99; color: #808000; }
+        .color-brush.active {
+            border-color: #2c3e50;
+            transform: scale(1.05);
+        }
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .word-card {
+            border: 2px solid #bdc3c7;
+            border-radius: 15px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: background-color 0.3s, transform 0.1s, border-color 0.2s;
+        }
+        .word-card:hover { transform: translateY(-2px); }
+        .action-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .btn {
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .btn-check { background-color: #2ecc71; color: white; }
+        .btn-check:hover { background-color: #27ae60; }
+        .btn-next { background-color: #3498db; color: white; }
+        .btn-next:hover { background-color: #2980b9; }
+        .feedback-board {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-box">
+        <h1>🎨 เกมระบายสีแยกแยะคำศัพท์ 🎨</h1>
+        <div class="subtitle">1. เลือกสีพู่กันด้านบน -> 2. จิ้มระบายสีที่กล่องคำศัพท์ด้านล่าง</div>
+
+        <div class="palette-container">
+            <div class="color-brush brush-r active" onclick="selectColor('r', this)">🔴 ควบ ร</div>
+            <div class="color-brush brush-l" onclick="selectColor('l', this)">🟢 ควบ ล</div>
+            <div class="color-brush brush-w" onclick="selectColor('w', this)">🔵 ควบ ว</div>
+            <div class="color-brush brush-h" onclick="selectColor('h', this)">🟡 ห นำ</div>
+        </div>
+
+        <!-- แก้ไขจุดบกพร่อง: ใส่บอร์ดรองรับบัตรคำศัพท์กลับมาแล้วครับ -->
+        <div class="words-grid" id="words-board"></div>
+
+        <div class="action-container">
+            <button class="btn btn-check" onclick="checkAnswers()">ตรวจคำตอบ ✅</button>
+            <button class="btn btn-next" onclick="initGame()">สุ่มคำชุดใหม่ 🔄</button>
+        </div>
+
+        <div class="feedback-board" id="game-feedback"></div>
+    </div>
+
+    <script>
+        const db = {
+            r: ["กรง", "กรวด", "กรีด", "กราม", "ไกร", "กระจก", "กระดิ่ง", "กระดุม", "กระโดด", "กระต่าย", "กระเทียม", "กระเป๋า", "กระโปรง", "กระรอก", "ตะกร้า", "ครู", "ใคร", "ครัว", "โครง", "ครก", "ตรง", "ตรา", "แปรง", "ปรุง", "ปรับ", "พระ", "เพราะ", "พริก", "พร้อม"],
+            l: ["กล้วย", "กลาย", "ขลาด", "เปลี่ยน", "ปลูก", "พลอย", "เปลว", "กลอง", "กลิ่น", "เขลา", "แปลง", "พลาด", "เผลอ", "ปลิง", "กลับ", "เกลือ", "โขลง", "ปลา", "พลั้ง", "ใกล้", "กลม", "โคลน", "เปล่า", "คลาน", "เปล", "เพลง", "ปลอม", "กลัว", "กล่าว", "แปล"],
+            w: ["กวัก", "กวัด", "แกว่ง", "กวา", "กว่า", "กวาง", "กว้าง", "กวาด", "ไกว", "เกวียน", "ขวัญ", "ขวา", "ขวาง", "ขว้าง", "ขวาน", "ขวิด", "แขวง", "แขวน", "ควัก", "ควาน", "คว่ำ", "คว้า", "ควาญ", "ความ", "แควน", "แคว้น", "แตงกวา", "มือขวา", "ควายป่า", "ควันไฟ"],
+            h: ["หมา", "หนู", "หนี", "หมี", "หมู", "หวี่", "หมอ", "หม้อ", "หมู่", "ใหม่", "ไหม้", "ใหญ่", "หญิง", "หญ้า", "ไหว", "ไhว้", "ไหน", "ไหม", "หลาน", "หวาน", "หว่าน", "แหลม", "หมาก", "หมอก", "หมัด", "หมด", "เหนือ", "เหนื่อย", "หลัง", "เหล่า"]
+        };
+        const colors = { r: '#ff9999', l: '#99ff99', w: '#99ccff', h: '#ffff99' };
+        let selectedCategory = 'r';
+        let currentRoundWords = [];
+        function selectColor(category, element) {
+            selectedCategory = category;
+            document.querySelectorAll('.color-brush').forEach(b => b.classList.remove('active'));
+            element.classList.add('active');
+        }
+        function initGame() {
+            document.getElementById('game-feedback').innerText = '';
+            document.getElementById('game-feedback').style.color = '#2c3e50';
+            const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+            let rItems = shuffle([...db.r]).slice(0, 2).map(w => ({ word: w, cat: 'r', userCat: '' }));
+            let lItems = shuffle([...db.l]).slice(0, 2).map(w => ({ word: w, cat: 'l', userCat: '' }));
+            let wItems = shuffle([...db.w]).slice(0, 2).map(w => ({ word: w, cat: 'w', userCat: '' }));
+            let hItems = shuffle([...db.h]).slice(0, 3).map(w => ({ word: w, cat: 'h', userCat: '' }));
+            currentRoundWords = shuffle([...rItems, ...lItems, ...wItems, ...hItems]);
+            const board = document.getElementById('words-board');
+            board.innerHTML = '';
+            currentRoundWords.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.innerText = item.word;
+                card.id = `card-${index}`;
+                card.onclick = () => {
+                    item.userCat = selectedCategory;
+                    card.style.backgroundColor = colors[selectedCategory];
+                    card.style.borderColor = '#bdc3c7';
+                };
+                board.appendChild(card);
+            });
+        }
+        function checkAnswers() {
+            let correctCount = 0;
+            let uncolored = false;
+            currentRoundWords.forEach((item, index) => {
+                const card = document.getElementById(`card-${index}`);
+                if (!item.userCat) {
+                    uncolored = true;
+                    card.style.borderColor = '#e74c3c';
+                } else if (item.userCat === item.cat) {
+                    correctCount++;
+                    card.style.borderColor = '#2ecc71';
+                } else {
+                    card.style.borderColor = '#e74c3c';
+                }
+            });
+            const feedback = document.getElementById('game-feedback');
+            if (uncolored) {
+                feedback.innerText = 'คำเตือน: เด็ก ๆ ยังระบายสีกล่องคำศัพท์ไม่ครบทุกช่องเลยครับ';
+                feedback.style.color = '#e67e22';
+            } else if (correctCount === 9) {
+                feedback.innerText = 'ยอดเยี่ยมที่สุด! ระบายสีถูกต้องครบทั้ง 9 คำเลยครับ เก่งมาก ๆ';
+                feedback.style.color = '#2ecc71';
+            } else {
+                feedback.innerText = 'ถูกต้อง ' + correctCount + ' คำ จากทั้งหมด 9 คำ ลองตรวจเช็คกล่องสีแดงดูอีกทีนะจ๊ะ';
+                feedback.style.color = '#e74c3c';
+            }
+        }
+        window.onload = initGame;
+    </script>
+</body>
+</html>
