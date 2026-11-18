@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ร้านค้าชั่งผลไม้ ป.1</title>
+
+  <!-- =========================================================
+       ส่วนที่ 1: โครงสร้างหน้าเว็บและตกแต่งสไตล์ (HTML & CSS)
+       ========================================================= -->
+  <style>
+    @import url('https://googleapis.com');
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: linear-gradient(135deg, #fff8e7 0%, #ffe4c4 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 720px;
+      border-radius: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+      border: 6px solid #ff9f1c;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffbf69;
+      padding: 12px 20px;
+      border-radius: 18px;
+      color: #4a2c00;
+      margin-bottom: 18px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .score-board {
+      background: #ffffff;
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #e36414;
+    }
+
+    /* กล่องออเดอร์ลูกค้า */
+    .customer-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #e0fbfc;
+      border: 3px dashed #3d5a80;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .customer-avatar {
+      font-size: 3.5rem;
+      background: #ffffff;
+      border-radius: 50%;
+      width: 76px;
+      height: 76px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .order-text {
+      font-size: 1.25rem;
+      color: #1d3557;
+      font-weight: 600;
+    }
+
+    .order-highlight {
+      display: inline-block;
+      background: #ff595e;
+      color: #fff;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 1.35rem;
+      margin-top: 4px;
+    }
+
+    /* พื้นที่เครื่องชั่ง */
+    .scale-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .scale-pan {
+      width: 280px;
+      min-height: 76px;
+      background: #d8e2dc;
+      border-bottom: 8px solid #8d99ae;
+      border-radius: 16px 16px 40px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      padding: 8px;
+      font-size: 2rem;
+    }
+
+    .scale-neck {
+      width: 36px;
+      height: 22px;
+      background: #adb5bd;
+    }
+
+    .scale-body {
+      width: 220px;
+      height: 220px;
+      background: #2ec4b6;
+      border-radius: 36px;
+      border: 6px solid #1b9aaa;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 0 #157f8c;
+      position: relative;
+    }
+
+    .dial {
+      width: 165px;
+      height: 165px;
+      background: #ffffff;
+      border-radius: 50%;
+      border: 5px solid #e9ecef;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dial-number {
+      position: absolute;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #2b2d42;
+    }
+
+    .needle {
+      width: 4px;
+      height: 62px;
+      background: #e63946;
+      position: absolute;
+      bottom: 50%;
+      left: calc(50% - 2px);
+      transform-origin: bottom center;
+      transform: rotate(0deg);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 4px;
+    }
+
+    .center-dot {
+      width: 14px;
+      height: 14px;
+      background: #1d3557;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .weight-readout {
+      margin-top: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2b2d42;
+      background: #f8f9fa;
+      padding: 6px 18px;
+      border-radius: 12px;
+      border: 2px solid #dee2e6;
+    }
+
+    /* ตะกร้าผลไม้ให้เลือกหยิบ */
+    .shelf-title {
+      text-align: center;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .fruit-shelf {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .fruit-btn {
+      background: #fff3b0;
+      border: 3px solid #f4a261;
+      border-radius: 18px;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .fruit-btn:hover {
+      transform: translateY(-4px);
+      background: #ffe66d;
+    }
+
+    .fruit-btn:active {
+      transform: scale(0.95);
+    }
+
+    .fruit-emoji {
+      font-size: 2.5rem;
+    }
+
+    .fruit-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .fruit-weight {
+      font-size: 0.9rem;
+      color: #d62828;
+      font-weight: 600;
+    }
+
+    /* ปุ่มควบคุม */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      border: none;
+      padding: 14px 24px;
+      border-radius: 16px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-clear {
+      background: #adb5bd;
+      color: #fff;
+    }
+
+    .btn-check {
+      background: #38b000;
+      color: #fff;
+      box-shadow: 0 5px 0 #2b9348;
+    }
+
+    .feedback {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 16px;
+      min-height: 36px;
+    }
+
+    .success { color: #2b9348; }
+    .error { color: #d90429; }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">
+      <h1>🍎 ร้านค้าชั่งผลไม้ ป.1</h1>
+      <div class="score-board">คะแนน: <span id="score">0</span> ⭐</div>
+    </div>
+
+    <div class="customer-box">
+      <div class="customer-avatar" id="customer-avatar">👧</div>
+      <div class="order-text">
+        ลูกค้า: "สวัสดีจ้า ขอซื้อ <span id="order-fruit">แอปเปิล</span> หนัก"<br />
+        <span class="order-highlight" id="order-target">2 กิโลกรัม</span>
+      </div>
+    </div>
+
+    <div class="scale-area">
+      <div class="scale-pan" id="scale-pan"></div>
+      <div class="scale-neck"></div>
+      <div class="scale-body">
+        <div class="dial" id="dial">
+          <div class="needle" id="needle"></div>
+          <div class="center-dot"></div>
+        </div>
+      </div>
+      <div class="weight-readout">
+        น้ำหนักบนตาชั่ง: <span id="current-weight">0</span> กิโลกรัม
+      </div>
+    </div>
+
+    <div class="shelf-title">👇 แตะผลไม้เพื่อวางบนตาชั่ง (สูงสุด 5 กิโลกรัม)</div>
+    <div class="fruit-shelf" id="fruit-shelf"></div>
+
+    <div class="controls">
+      <button class="btn btn-clear" onclick="clearScale()">🔄 หยิบออกหมด</button>
+      <button class="btn btn-check" onclick="checkOrder()">✅ ส่งของให้ลูกค้า</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+
+  <!-- =========================================================
+       ส่วนที่ 2: ระบบการทำงานและคำนวณของเกม (JavaScript)
+       ========================================================= -->
+  <script>
+    const fruits = [
+      { name: "ส้ม", emoji: "🍊", weight: 1 },
+      { name: "แอปเปิล", emoji: "🍎", weight: 1 },
+      { name: "สับปะรด", emoji: "🍍", weight: 2 },
+      { name: "แตงโม", emoji: "🍉", weight: 3 }
+    ];
+
+    const customers = ["👧", "👦", "👵", "👨", "👩", "🧒"];
+
+    let score = 0;
+    let currentWeight = 0;
+    let panItems = [];
+    let targetFruit = fruits[0];
+    let targetWeight = 2;
+
+    function setupDial() {
+      const dial = document.getElementById("dial");
+      const maxKg = 5;
+      for (let i = 0; i < maxKg; i++) {
+        const angle = (i / maxKg) * 360 - 90;
+        const rad = (angle * Math.PI) / 180;
+        const radius = 60;
+        const x = 72 + radius * Math.cos(rad);
+        const y = 70 + radius * Math.sin(rad);
+
+        const num = document.createElement("div");
+        num.className = "dial-number";
+        num.style.left = `${x}px`;
+        num.style.top = `${y}px`;
+        num.textContent = i === 0 ? "0/5" : i;
+        dial.appendChild(num);
+      }
+    }
+
+    function setupShelf() {
+      const shelf = document.getElementById("fruit-shelf");
+      shelf.innerHTML = "";
+      fruits.forEach((fruit) => {
+        const btn = document.createElement("button");
+        btn.className = "fruit-btn";
+        btn.innerHTML = `
+          <div class="fruit-emoji">${fruit.emoji}</div>
+          <div class="fruit-name">${fruit.name}</div>
+          <div class="fruit-weight">หนัก ${fruit.weight} กก.</div>
+        `;
+        btn.onclick = () => addFruit(fruit);
+        shelf.appendChild(btn);
+      });
+    }
+
+    function newOrder() {
+      clearScale();
+      document.getElementById("feedback").textContent = "";
+      targetFruit = fruits[Math.floor(Math.random() * fruits.length)];
+
+      const possibleWeights = [];
+      for (let w = targetFruit.weight; w <= 5; w += targetFruit.weight) {
+        possibleWeights.push(w);
+      }
+      targetWeight = possibleWeights[Math.floor(Math.random() * possibleWeights.length)];
+
+      const avatar = customers[Math.floor(Math.random() * customers.length)];
+      document.getElementById("customer-avatar").textContent = avatar;
+      document.getElementById("order-fruit").textContent = `${targetFruit.emoji} ${targetFruit.name}`;
+      document.getElementById("order-target").textContent = `${targetWeight} กิโลกรัม`;
+    }
+
+    function addFruit(fruit) {
+      const feedback = document.getElementById("feedback");
+      if (currentWeight + fruit.weight > 5) {
+        feedback.textContent = "⚠️ ตาชั่งรับน้ำหนักได้สูงสุด 5 กิโลกรัมจ้า!";
+        feedback.className = "feedback error";
+        return;
+      }
+      feedback.textContent = "";
+      panItems.push(fruit);
+      currentWeight += fruit.weight;
+      updateScaleUI();
+    }
+
+    function clearScale() {
+      panItems = [];
+      currentWeight = 0;
+      document.getElementById("feedback").textContent = "";
+      updateScaleUI();
+    }
+
+    function updateScaleUI() {
+      const pan = document.getElementById("scale-pan");
+      pan.innerHTML = panItems.map((item) => `<span>${item.emoji}</span>`).join("");
+      document.getElementById("current-weight").textContent = currentWeight;
+
+      const deg = (currentWeight / 5) * 360;
+      document.getElementById("needle").style.transform = `rotate(${deg}deg)`;
+    }
+
+    function checkOrder() {
+      const feedback = document.getElementById("feedback");
+      const allCorrectFruit = panItems.every((item) => item.name === targetFruit.name);
+
+      if (panItems.length === 0) {
+        feedback.textContent = "😊 หยิบผลไม้วางบนตาชั่งก่อนนะจ๊ะ";
+        feedback.className = "feedback error";
+        return;
+      }
+
+      if (!allCorrectFruit) {
+        feedback.textContent = `❌ เอ๊ะ! ลูกค้าสั่ง ${targetFruit.name} นะจ๊ะ ลองหยิบใหม่ดูนะ`;
+        feedback.className = "feedback error";
+        return;
+      }
+
+      if (currentWeight === targetWeight) {
+        score += 10;
+        document.getElementById("score").textContent = score;
+        feedback.textContent = "🎉 เก่งมากเลย! ชั่งได้ตรงเป๊ะ รับไป 10 คะแนน!";
+        feedback.className = "feedback success";
+        setTimeout(newOrder, 1600);
+      } else if (currentWeight < targetWeight) {
+        feedback.textContent = `⚖️ ยังเบาไปหน่อยนะ ตอนนี้หนัก ${currentWeight} กก. ลองเพิ่มอีกนิด!`;
+        feedback.className = "feedback error";
+      } else {
+        feedback.textContent = `⚖️ หนักเกินไปแล้วจ้า ตอนนี้หนัก ${currentWeight} กก. ลองหยิบออกใหม่นะ!`;
+        feedback.className = "feedback error";
+      }
+    }
+
+    setupDial();
+    setupShelf();
+    newOrder();
+  </script>
+
