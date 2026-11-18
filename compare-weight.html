@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เกมเปรียบเทียบน้ำหนัก กิโลกรัม กับ ขีด</title>
+
+  <!-- =========================================================
+       ส่วนที่ 1: โครงสร้างหน้าเว็บและตกแต่งสไตล์ (HTML & CSS)
+       ========================================================= -->
+  <style>
+    @import url('https://googleapis.com');
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: linear-gradient(135deg, #e0f7fa 0%, #fff3e0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 720px;
+      border-radius: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+      border: 6px solid #00b4d8;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #90e0ef;
+      padding: 12px 20px;
+      border-radius: 18px;
+      color: #03045e;
+      margin-bottom: 14px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .score-board {
+      background: #ffffff;
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #0077b6;
+    }
+
+    /* แถบสูตรช่วยจำ */
+    .hint-banner {
+      background: #fff3b0;
+      border: 2px dashed #f4a261;
+      border-radius: 14px;
+      padding: 10px 16px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #5c3a00;
+      margin-bottom: 20px;
+    }
+
+    .question-title {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    /* พื้นที่เปรียบเทียบซ้าย-ขวา */
+    .compare-board {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .weight-card {
+      flex: 1;
+      background: #f8f9fa;
+      border: 4px solid #adb5bd;
+      border-radius: 22px;
+      padding: 20px 12px;
+      text-align: center;
+      box-shadow: 0 6px 0 #dee2e6;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .weight-card.left {
+      border-color: #ff9f1c;
+      background: #fffdf7;
+    }
+
+    .weight-card.right {
+      border-color: #2ec4b6;
+      background: #f4fcfb;
+    }
+
+    .item-icon {
+      font-size: 3rem;
+      margin-bottom: 8px;
+    }
+
+    .weight-label {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1d3557;
+      line-height: 1.4;
+    }
+
+    .sign-slot {
+      width: 74px;
+      height: 74px;
+      background: #e9ecef;
+      border: 4px dashed #6c757d;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #e63946;
+      flex-shrink: 0;
+    }
+
+    .sign-slot.answered {
+      background: #fff3b0;
+      border-style: solid;
+      border-color: #ff9f1c;
+    }
+
+    /* ปุ่มเลือกเครื่องหมาย */
+    .choices-area {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .choice-btn {
+      background: #ffffff;
+      border: 3px solid #0077b6;
+      border-radius: 18px;
+      padding: 14px 8px;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 5px 0 #0077b6;
+    }
+
+    .choice-btn:hover {
+      background: #caf0f8;
+      transform: translateY(-3px);
+    }
+
+    .choice-btn:active {
+      transform: scale(0.95);
+    }
+
+    .choice-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .choice-symbol {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #03045e;
+      line-height: 1.1;
+    }
+
+    .choice-word {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0077b6;
+      margin-top: 4px;
+    }
+
+    /* กล่องเฉลยและคำอธิบาย */
+    .feedback-box {
+      min-height: 76px;
+      border-radius: 16px;
+      padding: 12px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .feedback-main {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .feedback-explain {
+      font-size: 1rem;
+      margin-top: 4px;
+      color: #333;
+    }
+
+    .feedback-box.success {
+      background: #d8f3dc;
+      border: 2px solid #2b9348;
+      color: #1b4332;
+    }
+
+    .feedback-box.error {
+      background: #ffe5ec;
+      border: 2px solid #d90429;
+      color: #800f2f;
+    }
+
+    .next-btn {
+      margin-top: 12px;
+      background: #ff9f1c;
+      color: #ffffff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #e36414;
+      display: none;
+    }
+
+    .next-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">
+      <h1>⚖️ เกมเปรียบเทียบน้ำหนัก</h1>
+      <div class="score-board">คะแนน: <span id="score">0</span> ⭐</div>
+    </div>
+
+    <div class="hint-banner">
+      💡 สูตรลับจำให้แม่น: <strong>1 กิโลกรัม = 10 ขีด</strong>
+    </div>
+
+    <div class="question-title">เลือกเครื่องหมายเปรียบเทียบน้ำหนักฝั่งซ้าย กับ ฝั่งขวา</div>
+
+    <div class="compare-board">
+      <div class="weight-card left">
+        <div class="item-icon" id="left-icon">🍉</div>
+        <div class="weight-label" id="left-text">2 กิโลกรัม 1 ขีด</div>
+      </div>
+
+      <div class="sign-slot" id="sign-slot">?</div>
+
+      <div class="weight-card right">
+        <div class="item-icon" id="right-icon">🍍</div>
+        <div class="weight-label" id="right-text">22 ขีด</div>
+      </div>
+    </div>
+
+    <div class="choices-area">
+      <button class="choice-btn" onclick="checkAnswer('>')">
+        <span class="choice-symbol">&gt;</span>
+        <span class="choice-word">มากกว่า (หนักกว่า)</span>
+      </button>
+      <button class="choice-btn" onclick="checkAnswer('=')">
+        <span class="choice-symbol">=</span>
+        <span class="choice-word">เท่ากับ (หนักเท่ากัน)</span>
+      </button>
+      <button class="choice-btn" onclick="checkAnswer('<')">
+        <span class="choice-symbol">&lt;</span>
+        <span class="choice-word">น้อยกว่า (เบากว่า)</span>
+      </button>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-main" id="feedback-main"></div>
+      <div class="feedback-explain" id="feedback-explain"></div>
+      <button class="next-btn" id="next-btn" onclick="generateQuestion()">ข้อต่อไป ➡️</button>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       ส่วนที่ 2: ระบบสุ่มโจทย์แปลงหน่วยและตรวจคำตอบ (JavaScript)
+       ========================================================= -->
+    <script>
+    const itemIcons = ["🍉", "🍍", "🎃", "🥭", "🍎", "🍊", "🍌", "🥥"];
+    let score = 0;
+    let leftTotalKheed = 21;
+    let rightTotalKheed = 22;
+    let correctSign = "<";
+    let isAnswered = false;
+
+    function formatMixedUnit(totalKheed) {
+      const kg = Math.floor(totalKheed / 10);
+      const kheed = totalKheed % 10;
+      return kheed === 0 ? `${kg} กิโลกรัม` : `${kg} กิโลกรัม ${kheed} ขีด`;
+    }
+
+    function generateQuestion() {
+      isAnswered = false;
+      const signSlot = document.getElementById("sign-slot");
+      signSlot.textContent = "?";
+      signSlot.classList.remove("answered");
+
+      document.getElementById("feedback-box").className = "feedback-box";
+      document.getElementById("feedback-main").textContent = "";
+      document.getElementById("feedback-explain").textContent = "";
+      document.getElementById("next-btn").style.display = "none";
+      document.querySelectorAll(".choice-btn").forEach(btn => btn.disabled = false);
+
+      const baseKheed = Math.floor(Math.random() * 49) + 11;
+      const diffs = [-4, -3, -2, -1, 0, 0, 1, 2, 3, 4];
+      const diff = diffs[Math.floor(Math.random() * diffs.length)];
+
+      leftTotalKheed = baseKheed;
+      rightTotalKheed = Math.max(10, baseKheed + diff);
+
+      if (leftTotalKheed === rightTotalKheed) {
+        correctSign = "=";
+      } else if (leftTotalKheed - rightTotalKheed > 0) {
+        correctSign = ">";
+      } else {
+        correctSign = "<";
+      }
+
+      const leftIsMixed = Math.random() >= 0.5;
+      document.getElementById("left-text").textContent = leftIsMixed ? formatMixedUnit(leftTotalKheed) : `${leftTotalKheed} ขีด`;
+      document.getElementById("right-text").textContent = leftIsMixed ? `${rightTotalKheed} ขีด` : formatMixedUnit(rightTotalKheed);
+
+      const icon1 = itemIcons[Math.floor(Math.random() * itemIcons.length)];
+      let icon2 = itemIcons[Math.floor(Math.random() * itemIcons.length)];
+      while (icon2 === icon1) {
+        icon2 = itemIcons[Math.floor(Math.random() * itemIcons.length)];
+      }
+      document.getElementById("left-icon").textContent = icon1;
+      document.getElementById("right-icon").textContent = icon2;
+    }
+
+    function checkAnswer(selectedSign) {
+      if (isAnswered) return;
+      isAnswered = true;
+      document.querySelectorAll(".choice-btn").forEach(btn => btn.disabled = true);
+
+      const signSlot = document.getElementById("sign-slot");
+      signSlot.textContent = selectedSign;
+      signSlot.classList.add("answered");
+
+      const feedbackBox = document.getElementById("feedback-box");
+      const explainText = `วิธีคิด: ฝั่งซ้าย = ${leftTotalKheed} ขีด และ ฝั่งขวา = ${rightTotalKheed} ขีด (${leftTotalKheed} ${correctSign} ${rightTotalKheed})`;
+
+      if (selectedSign === correctSign) {
+        score += 10;
+        document.getElementById("score").textContent = score;
+        feedbackBox.className = "feedback-box success";
+        document.getElementById("feedback-main").textContent = "🎉 ถูกต้อง เก่งมากเลย! รับไป 10 คะแนน";
+      } else {
+        feedbackBox.className = "feedback-box error";
+        document.getElementById("feedback-main").textContent = `❌ ยังไม่ถูกนะจ๊ะ คำตอบที่ถูกคือ "${correctSign}"`;
+      }
+      document.getElementById("feedback-explain").textContent = explainText;
+      document.getElementById("next-btn").style.display = "inline-block";
+    }
+
+    generateQuestion();
+  </script>
+</body>
+</html>
