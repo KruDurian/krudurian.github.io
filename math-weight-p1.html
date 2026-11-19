@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบงานโจทย์ปัญหาการชั่งน้ำหนัก ป.1</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 12mm 15mm; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #e9ecef; color: #000; margin: 0; padding: 15px; line-height: 1.45; }
+        .no-print { text-align: center; margin: 0 auto 15px auto; background: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 210mm; }
+        .print-btn { background-color: #0277bd; color: white; border: none; padding: 10px 20px; font-size: 15px; font-family: 'Sarabun', sans-serif; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 4px; }
+        .toggle-ans-btn { background-color: #2e7d32; color: white; border: none; padding: 10px 18px; font-size: 15px; font-family: 'Sarabun', sans-serif; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 4px; }
+        .page { background: white; width: 100%; max-width: 210mm; margin: 0 auto 20px auto; padding: 20px 25px; box-sizing: border-box; box-shadow: 0 0 12px rgba(0,0,0,0.12); }
+        .worksheet-header { border: 2px solid #333; border-radius: 12px; padding: 12px 15px; margin-bottom: 14px; }
+        .title { text-align: center; font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+        .subtitle { text-align: center; font-size: 15.5px; font-weight: 600; margin-bottom: 10px; color: #333; }
+        .student-info { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 14.5px; border-top: 1px dashed #666; padding-top: 8px; }
+        .instruction { font-weight: 700; font-size: 14.5px; margin-bottom: 12px; }
+        .question-item { margin-bottom: 11px; page-break-inside: avoid; }
+        .q-text { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 15px; padding-left: 20px; font-size: 14.5px; }
+        .option { display: flex; align-items: center; }
+        .circle { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+        .answer-key-page { page-break-before: always; }
+        .ans-box { border: 2px dashed #333; border-radius: 12px; padding: 18px; }
+        .ans-item { margin-bottom: 8px; font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        @media print {
+            body { background: none; padding: 0; }
+            .no-print { display: none !important; }
+            .page { box-shadow: none; margin: 0; padding: 0; max-width: 100%; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ สั่งพิมพ์ใบงาน (หรือบันทึกเป็น PDF)</button>
+    <button class="toggle-ans-btn" onclick="toggleAnswerPage()">👁️ ซ่อน / แสดง หน้าเฉลย</button>
+</div>
+
+<div class="page">
+    <div class="worksheet-header">
+        <div class="title">❄️ แบบทดสอบโจทย์ปัญหาคณิตศาสตร์ ชั้นประถมศึกษาปีที่ 1 🧜‍♀️</div>
+        <div class="subtitle">เรื่อง การชั่งน้ำหนัก (กิโลกรัม และ ขีด)</div>
+        <div class="student-info">
+            <span>ชื่อ-นามสกุล: .............................................................</span>
+            <span>ชั้น ป.1/......</span>
+            <span>เลขที่: ........</span>
+            <span>คะแนน: ......./10</span>
+        </div>
+    </div>
+
+    <div class="instruction">คำชี้แจง: ให้นักเรียนระบายสีหรือทำเครื่องหมายกากบาท (✗) ลงในวงกลมหน้าคำตอบที่ถูกต้องที่สุดเพียงข้อเดียว</div>
+
+    <div class="question-item">
+        <div class="q-text">1. เอลซ่ามีส้มหนัก 4 กิโลกรัม แอนนามีแอปเปิ้ลหนัก 3 กิโลกรัม ถ้านำผลไม้ของทั้งสองคนมาชั่งรวมกันจะหนักกี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 1 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 4 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 7 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 8 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">2. แอนนาและแอเรียลช่วยกันเก็บเปลือกหอยกับก้อนหินใส่ถุง ชั่งรวมกันได้หนัก 9 กิโลกรัม ถ้ารู้ว่าเป็นน้ำหนักของเปลือกหอย 5 กิโลกรัม ที่เหลือจะเป็นน้ำหนักของก้อนหินกี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 3 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 4 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 5 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 14 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">3. แอเรียลหิ้วตะกร้าปะการังหนัก 4 กิโลกรัม ส่วนเอลซ่าหิ้วตะกร้าน้ำแข็งที่หนักกว่าตะกร้าของแอเรียลอยู่ 3 กิโลกรัม ตะกร้าของเอลซ่าหนักกี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 1 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 4 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 7 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 8 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">4. เอลซ่าปั้นตุ๊กตาหิมะหนัก 8 กิโลกรัม แอนนาปั้นตุ๊กตาหิมะที่เบากว่าของเอลซ่าอยู่ 3 กิโลกรัม ตุ๊กตาหิมะของแอนนาหนักกี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 3 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 5 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 8 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 11 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">5. แอเรียลมีแตงโมหนัก 7 กิโลกรัม แอนนามีสับปะรดหนัก 4 กิโลกรัม แตงโมของแอเรียลหนักกว่าสับปะรดของแอนนากี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 3 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 4 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 7 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 11 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">6. เอลซ่าเตรียมแป้งทำขนมไว้ทั้งหมด 10 ขีด แบ่งให้แอเรียลไปทำคุกกี้ 4 ขีด เอลซ่าจะเหลือแป้งทำขนมกี่ขีด?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 4 ขีด</div>
+            <div class="option"><span class="circle"></span>ข. 5 ขีด</div>
+            <div class="option"><span class="circle"></span>ค. 6 ขีด</div>
+            <div class="option"><span class="circle"></span>ง. 14 ขีด</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">7. ถุงขนมของแอนนาหนัก 9 ขีด ซึ่งหนักกว่าถุงขนมของแอเรียลอยู่ 3 ขีด ถุงขนมของแอเรียลหนักกี่ขีด?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 3 ขีด</div>
+            <div class="option"><span class="circle"></span>ข. 6 ขีด</div>
+            <div class="option"><span class="circle"></span>ค. 9 ขีด</div>
+            <div class="option"><span class="circle"></span>ง. 12 ขีด</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">8. มังคุดของเอลซ่าหนัก 5 กิโลกรัม ซึ่งเบากว่าทุเรียนของแอนนาอยู่ 4 กิโลกรัม ทุเรียนของแอนนาหนักกี่กิโลกรัม?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 1 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ข. 5 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ค. 8 กิโลกรัม</div>
+            <div class="option"><span class="circle"></span>ง. 9 กิโลกรัม</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">9. แอเรียลเก็บสาหร่ายทะเลได้ 5 ขีด เอลซ่าเก็บมาเพิ่มให้อีก 4 ขีด ตอนนี้ทั้งสองคนมีสาหร่ายทะเลรวมกันกี่ขีด?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 1 ขีด</div>
+            <div class="option"><span class="circle"></span>ข. 5 ขีด</div>
+            <div class="option"><span class="circle"></span>ค. 9 ขีด</div>
+            <div class="option"><span class="circle"></span>ง. 10 ขีด</div>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <div class="q-text">10. กล่องของขวัญของแอนนาหนัก 3 ขีด กล่องของขวัญของแอเรียลหนัก 8 ขีด กล่องของขวัญของแอนนาเบากว่าของแอเรียลกี่ขีด?</div>
+        <div class="options-grid">
+            <div class="option"><span class="circle"></span>ก. 3 ขีด</div>
+            <div class="option"><span class="circle"></span>ข. 5 ขีด</div>
+            <div class="option"><span class="circle"></span>ค. 8 ขีด</div>
+            <div class="option"><span class="circle"></span>ง. 11 ขีด</div>
+        </div>
+    </div>
+</div>
+
+<div class="page answer-key-page" id="answer-page">
+    <div class="worksheet-header">
+        <div class="title">🔑 เฉลยแบบทดสอบโจทย์ปัญหาคณิตศาสตร์ ป.1</div>
+        <div class="subtitle">เรื่อง การชั่งน้ำหนัก (กิโลกรัม และ ขีด)</div>
+    </div>
+    <div class="ans-box">
+        <div class="ans-item"><strong>ข้อที่ 1:</strong> ตอบ <strong>ค. 7 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 2:</strong> ตอบ <strong>ข. 4 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 3:</strong> ตอบ <strong>ค. 7 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 4:</strong> ตอบ <strong>ข. 5 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 5:</strong> ตอบ <strong>ก. 3 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 6:</strong> ตอบ <strong>ค. 6 ขีด</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 7:</strong> ตอบ <strong>ข. 6 ขีด</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 8:</strong> ตอบ <strong>ง. 9 กิโลกรัม</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 9:</strong> ตอบ <strong>ค. 9 ขีด</strong></div>
+        <div class="ans-item"><strong>ข้อที่ 10:</strong> ตอบ <strong>ข. 5 ขีด</strong></div>
+    </div>
+</div>
+
+<script>
+    function toggleAnswerPage() {
+        var ansPage = document.getElementById("answer-page");
+        ansPage.style.display = (ansPage.style.display === "none") ? "block" : "none";
+    }
+</script>
+</body>
+</html>
