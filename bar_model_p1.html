@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบงานคณิตศาสตร์ ป.1 - สูตรลัด 3 ขั้นตอน (Bar Model)</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Sarabun', sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 20px auto;
+            padding: 15mm;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .header {
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #1d4ed8;
+        }
+        .student-info {
+            font-size: 14px;
+        }
+        .problem-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+        .problem-title {
+            font-size: 16px;
+            font-weight: 700;
+            background-color: #eff6ff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 12px;
+        }
+        .steps-container {
+            display: grid;
+            grid-template-columns: 1.1fr 1.2fr 1fr;
+            gap: 12px;
+            align-items: stretch;
+        }
+        .step-box {
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 8px 10px;
+            background-color: #fafafa;
+        }
+        .step-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            background-color: #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .step1-row {
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .blank-line {
+            border-bottom: 1px dotted #475569;
+            display: inline-block;
+            min-width: 75px;
+            height: 18px;
+            text-align: center;
+        }
+        .blank-long {
+            border-bottom: 1px dotted #475569;
+            display: inline-block;
+            min-width: 125px;
+            height: 18px;
+        }
+        .blank-small {
+            border-bottom: 1px dotted #475569;
+            display: inline-block;
+            min-width: 38px;
+            height: 18px;
+        }
+        .blank-op {
+            border-bottom: 1px dotted #475569;
+            display: inline-block;
+            min-width: 22px;
+            height: 18px;
+        }
+        .sq-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid #334155;
+            vertical-align: middle;
+        }
+        .bar-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bar-label {
+            width: 55px;
+            border-bottom: 1px dotted #475569;
+            height: 22px;
+            font-size: 13px;
+        }
+        .bar-long {
+            flex: 1;
+            height: 28px;
+            border: 1.5px solid #1e293b;
+            background-color: #ffffff;
+            border-radius: 3px;
+        }
+        .bar-short-group {
+            flex: 1;
+            display: flex;
+            height: 28px;
+        }
+        .bar-short {
+            width: 60%;
+            border: 1.5px solid #1e293b;
+            background-color: #ffffff;
+            border-radius: 3px 0 0 3px;
+        }
+        .bar-diff {
+            width: 40%;
+            border: 1.5px dashed #ef4444;
+            border-left: none;
+            background-color: #fef2f2;
+            border-radius: 0 3px 3px 0;
+        }
+        .step3-row {
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .print-btn {
+            display: block;
+            width: 200px;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            background-color: #2563eb;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .print-btn:hover {
+            background-color: #1d4ed8;
+        }
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                padding: 10mm;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ พิมพ์ใบงาน (Print)</button>
+
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>แบบฝึกหัด: โจทย์ปัญหาการเปรียบเทียบ (หาค่าที่ไม่ทราบค่า)</h1>
+            <div style="font-size: 13px; color: #475569;">เทคนิค 3 ขั้นตอน: สร้าง 3 ค่า (4 ข้อ) ➔ วาดบาร์ ➔ ประโยคสัญลักษณ์</div>
+        </div>
+        <div class="student-info">
+            ชื่อ-สกุล: ................................................... เลขที่: ........
+        </div>
+    </div>
+
+    <!-- ข้อที่ 1 -->
+    <div class="problem-card">
+        <div class="problem-title">1. แก้วมีดินสอ 12 แท่ง แก้วมีดินสอมากกว่ากล้า 7 แท่ง กล้ามีดินสอกี่แท่ง</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">2. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small"></span></div>
+                <div class="step1-row">4. <span class="blank-long"></span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-long"></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-short-group">
+                            <div class="bar-short"></div>
+                            <div class="bar-diff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small"></span> <span class="blank-op"></span> <span class="blank-small"></span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small"></span> แท่ง</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 2 -->
+    <div class="problem-card">
+        <div class="problem-title">2. นิดเก็บมะม่วงได้ 9 ผล นิดเก็บได้น้อยกว่าหน่อย 6 ผล หน่อยเก็บมะม่วงได้กี่ผล</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">2. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small"></span></div>
+                <div class="step1-row">4. <span class="blank-long"></span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-long"></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-short-group">
+                            <div class="bar-short"></div>
+                            <div class="bar-diff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small"></span> <span class="blank-op"></span> <span class="blank-small"></span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small"></span> ผล</div>
+            </div>
+        </div>
+    </div>
+    <!-- ข้อที่ 3 -->
+    <div class="problem-card">
+        <div class="problem-title">3. ในตู้มีปลาทอง 15 ตัว ปลาทองมากกว่าปลาหางนกยูง 6 ตัว มีปลาหางนกยูงกี่ตัว</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">2. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small"></span></div>
+                <div class="step1-row">4. <span class="blank-long"></span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-long"></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-short-group">
+                            <div class="bar-short"></div>
+                            <div class="bar-diff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small"></span> <span class="blank-op"></span> <span class="blank-small"></span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small"></span> ตัว</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 4 -->
+    <div class="problem-card">
+        <div class="problem-title">4. แม่ซื้อไข่ไก่ 10 ฟอง ซื้อไข่ไก่น้อยกว่าไข่เป็ด 8 ฟอง แม่ซื้อไข่เป็ดกี่ฟอง</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">2. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small"></span></div>
+                <div class="step1-row">4. <span class="blank-long"></span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-long"></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-short-group">
+                            <div class="bar-short"></div>
+                            <div class="bar-diff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small"></span> <span class="blank-op"></span> <span class="blank-small"></span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small"></span> ฟอง</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 5 -->
+    <div class="problem-card">
+        <div class="problem-title">5. โต้งมีลูกแก้ว 18 ลูก โต้งมีลูกแก้วมากกว่าต้น 5 ลูก ต้นมีลูกแก้วกี่ลูก</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">2. <span class="blank-line"></span> = <span class="blank-small"></span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small"></span></div>
+                <div class="step1-row">4. <span class="blank-long"></span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-long"></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label"></div>
+                        <div class="bar-short-group">
+                            <div class="bar-short"></div>
+                            <div class="bar-diff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small"></span> <span class="blank-op"></span> <span class="blank-small"></span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small"></span> ลูก</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- สไตล์เพิ่มเติมสำหรับหน้าเฉลย -->
+<style>
+    .ans-text {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    .bar-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    .bar-label-ans {
+        width: 65px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        text-align: right;
+        padding-right: 4px;
+    }
+</style>
+
+<!-- หน้าที่ 2: หน้าเฉลย -->
+<div class="page" style="page-break-before: always;">
+    <div class="header" style="border-bottom-color: #dc2626;">
+        <div>
+            <h1 style="color: #dc2626;">เฉลยแบบฝึกหัด: โจทย์ปัญหาการเปรียบเทียบ (Answer Key)</h1>
+            <div style="font-size: 13px; color: #475569;">เทคนิค 3 ขั้นตอน: สร้าง 3 ค่า (4 ข้อ) ➔ วาดบาร์ ➔ ประโยคสัญลักษณ์</div>
+        </div>
+        <div class="student-info" style="color: #dc2626; font-weight: bold;">
+            สำหรับครู / ผู้ปกครอง
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 1 -->
+    <div class="problem-card">
+        <div class="problem-title">1. แก้วมีดินสอ 12 แท่ง แก้วมีดินสอมากกว่ากล้า 7 แท่ง กล้ามีดินสอกี่แท่ง</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line ans-text">แก้ว</span> = <span class="blank-small ans-text">12</span></div>
+                <div class="step1-row">2. <span class="blank-line ans-text">กล้า</span> = <span class="blank-small ans-text">□</span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small ans-text">7</span></div>
+                <div class="step1-row">4. <span class="blank-long ans-text">แก้ว &gt; กล้า</span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label-ans">แก้ว</div>
+                        <div class="bar-long bar-text">12</div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label-ans">กล้า</div>
+                        <div class="bar-short-group">
+                            <div class="bar-short bar-text">□</div>
+                            <div class="bar-diff bar-text">7</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small ans-text">12</span> <span class="blank-op ans-text">-</span> <span class="blank-small ans-text">7</span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small ans-text">5</span> แท่ง</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 2 -->
+    <div class="problem-card">
+        <div class="problem-title">2. นิดเก็บมะม่วงได้ 9 ผล นิดเก็บได้น้อยกว่าหน่อย 6 ผล หน่อยเก็บมะม่วงได้กี่ผล</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line ans-text">นิด</span> = <span class="blank-small ans-text">9</span></div>
+                <div class="step1-row">2. <span class="blank-line ans-text">หน่อย</span> = <span class="blank-small ans-text">□</span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small ans-text">6</span></div>
+                <div class="step1-row">4. <span class="blank-long ans-text">หน่อย &gt; นิด</span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label-ans">หน่อย</div>
+                        <div class="bar-long bar-text">□</div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label-ans">นิด</div>
+                        <div class="bar-short-group">
+                            <div class="bar-short bar-text">9</div>
+                            <div class="bar-diff bar-text">6</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small ans-text">9</span> <span class="blank-op ans-text">+</span> <span class="blank-small ans-text">6</span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small ans-text">15</span> ผล</div>
+            </div>
+        </div>
+    </div>
+    <!-- เฉลยข้อที่ 3 -->
+    <div class="problem-card">
+        <div class="problem-title">3. ในตู้มีปลาทอง 15 ตัว ปลาทองมากกว่าปลาหางนกยูง 6 ตัว มีปลาหางนกยูงกี่ตัว</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line ans-text">ปลาทอง</span> = <span class="blank-small ans-text">15</span></div>
+                <div class="step1-row">2. <span class="blank-line ans-text">ปลาหางนกยูง</span> = <span class="blank-small ans-text">□</span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small ans-text">6</span></div>
+                <div class="step1-row">4. <span class="blank-long ans-text">ปลาทอง &gt; ปลาหางนกยูง</span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label-ans" style="font-size: 11px;">ปลาทอง</div>
+                        <div class="bar-long bar-text">15</div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label-ans" style="font-size: 10px;">ปลาหางนกยูง</div>
+                        <div class="bar-short-group">
+                            <div class="bar-short bar-text">□</div>
+                            <div class="bar-diff bar-text">6</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small ans-text">15</span> <span class="blank-op ans-text">-</span> <span class="blank-small ans-text">6</span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small ans-text">9</span> ตัว</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 4 -->
+    <div class="problem-card">
+        <div class="problem-title">4. แม่ซื้อไข่ไก่ 10 ฟอง ซื้อไข่ไก่น้อยกว่าไข่เป็ด 8 ฟอง แม่ซื้อไข่เป็ดกี่ฟอง</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line ans-text">ไข่ไก่</span> = <span class="blank-small ans-text">10</span></div>
+                <div class="step1-row">2. <span class="blank-line ans-text">ไข่เป็ด</span> = <span class="blank-small ans-text">□</span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small ans-text">8</span></div>
+                <div class="step1-row">4. <span class="blank-long ans-text">ไข่เป็ด &gt; ไข่ไก่</span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label-ans">ไข่เป็ด</div>
+                        <div class="bar-long bar-text">□</div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label-ans">ไข่ไก่</div>
+                        <div class="bar-short-group">
+                            <div class="bar-short bar-text">10</div>
+                            <div class="bar-diff bar-text">8</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small ans-text">10</span> <span class="blank-op ans-text">+</span> <span class="blank-small ans-text">8</span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small ans-text">18</span> ฟอง</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 5 -->
+    <div class="problem-card">
+        <div class="problem-title">5. โต้งมีลูกแก้ว 18 ลูก โต้งมีลูกแก้วมากกว่าต้น 5 ลูก ต้นมีลูกแก้วกี่ลูก</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="step1-row">1. <span class="blank-line ans-text">โต้ง</span> = <span class="blank-small ans-text">18</span></div>
+                <div class="step1-row">2. <span class="blank-line ans-text">ต้น</span> = <span class="blank-small ans-text">□</span></div>
+                <div class="step1-row">3. ส่วนต่าง = <span class="blank-small ans-text">5</span></div>
+                <div class="step1-row">4. <span class="blank-long ans-text">โต้ง &gt; ต้น</span></div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row">
+                        <div class="bar-label-ans">โต้ง</div>
+                        <div class="bar-long bar-text">18</div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label-ans">ต้น</div>
+                        <div class="bar-short-group">
+                            <div class="bar-short bar-text">□</div>
+                            <div class="bar-diff bar-text">5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="step3-row">ประโยคสัญลักษณ์:<br><span class="blank-small ans-text">18</span> <span class="blank-op ans-text">-</span> <span class="blank-small ans-text">5</span> = <span class="sq-box"></span></div>
+                <div class="step3-row"><strong>ตอบ:</strong> <span class="blank-small ans-text">13</span> ลูก</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
+
