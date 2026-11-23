@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบงานท้าทาย (ไม่เกิน 100): โจทย์ปัญหา ป.1 สูตรลัด 3 ขั้นตอน</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Sarabun', sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 20px auto;
+            padding: 15mm;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .header {
+            border-bottom: 2px solid #d97706;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #b45309;
+        }
+        .student-info {
+            font-size: 14px;
+        }
+        .problem-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+        .problem-title {
+            font-size: 16px;
+            font-weight: 700;
+            background-color: #fffbeb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+            margin-bottom: 12px;
+        }
+        .steps-container {
+            display: grid;
+            grid-template-columns: 1.1fr 1.2fr 1fr;
+            gap: 12px;
+            align-items: stretch;
+        }
+        .step-box {
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 8px 10px;
+            background-color: #ffffff;
+            min-height: 115px;
+            display: flex;
+            flex-direction: column;
+        }
+        .step-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            background-color: #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            align-self: flex-start;
+            margin-bottom: 8px;
+        }
+        /* สไตล์สำหรับหน้าเฉลย */
+        .ans-line {
+            font-size: 13.5px;
+            color: #dc2626;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .bar-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bar-label-ans {
+            width: 55px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #1e293b;
+            text-align: right;
+        }
+        .bar-long {
+            flex: 1;
+            height: 25px;
+            border: 1.5px solid #1e293b;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+        .bar-short-group {
+            flex: 1;
+            display: flex;
+            height: 25px;
+        }
+        .bar-short {
+            width: 60%;
+            border: 1.5px solid #1e293b;
+            border-radius: 3px 0 0 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+        .bar-diff {
+            width: 40%;
+            border: 1.5px dashed #ef4444;
+            border-left: none;
+            background-color: #fef2f2;
+            border-radius: 0 3px 3px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+        .print-btn {
+            display: block;
+            width: 240px;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            background-color: #d97706;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .print-btn:hover {
+            background-color: #b45309;
+        }
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                padding: 10mm;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ พิมพ์ใบงานท้าทาย (Print)</button>
+
+<!-- หน้าที่ 1: ใบงานสำหรับเด็กทดเอง -->
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>แบบฝึกหัดระดับท้าทาย (ไม่เกิน 100): โจทย์ปัญหา 3 ขั้นตอน</h1>
+            <div style="font-size: 13px; color: #475569;">เทคนิค 3 ขั้นตอน: สร้าง 3 ค่า (4 ข้อ) ➔ วาดบาร์ ➔ ประโยคสัญลักษณ์</div>
+        </div>
+        <div class="student-info">
+            ชื่อ-สกุล: ................................................... เลขที่: ........
+        </div>
+    </div>
+
+    <!-- ข้อที่ 1 (ลบแบบยืม: 52 - 18 = 34) -->
+    <div class="problem-card">
+        <div class="problem-title">1. แม่ค้ามีส้ม 52 ผล แม่ค้ามีส้มมากกว่าแตงโม 18 ผล แม่ค้ามีแตงโมกี่ผล</div>
+        <div class="steps-container">
+            <div class="step-box"><div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div></div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 2 (บวกแบบทด: 37 + 26 = 63) -->
+    <div class="problem-card">
+        <div class="problem-title">2. ต้นกล้าออมเงินได้ 37 บาท ต้นกล้าออมได้น้อยกว่าใบเฟิร์น 26 บาท ใบเฟิร์นออมเงินได้กี่บาท</div>
+        <div class="steps-container">
+            <div class="step-box"><div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div></div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 3 (ลบแบบยืม: 84 - 39 = 45) -->
+    <div class="problem-card">
+        <div class="problem-title">3. ฟาร์มแห่งหนึ่งมีไก่ 84 ตัว มีไก่มากกว่าเป็ด 39 ตัว ฟาร์มแห่งนี้มีเป็ดกี่ตัว</div>
+        <div class="steps-container">
+            <div class="step-box"><div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div></div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 4 (บวกแบบทด: 48 + 35 = 83) -->
+    <div class="problem-card">
+        <div class="problem-title">4. ห้อง ป.1/1 มีนักเรียน 48 คน มีนักเรียนน้อยกว่าห้อง ป.1/2 อยู่ 35 คน ห้อง ป.1/2 มีนักเรียนกี่คน</div>
+        <div class="steps-container">
+            <div class="step-box"><div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div></div>
+        </div>
+    </div>
+
+    <!-- ข้อที่ 5 (ลบแบบยืม: 91 - 47 = 44) -->
+    <div class="problem-card">
+        <div class="problem-title">5. พี่อ่านหนังสือได้ 91 หน้า พี่อ่านได้มากกว่าน้อง 47 หน้า น้องอ่านหนังสือได้กี่หน้า</div>
+        <div class="steps-container">
+            <div class="step-box"><div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div></div>
+            <div class="step-box"><div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div></div>
+        </div>
+    </div>
+</div>
+<!-- หน้าที่ 2: หน้าเฉลย -->
+<div class="page" style="page-break-before: always;">
+    <div class="header" style="border-bottom-color: #dc2626;">
+        <div>
+            <h1 style="color: #dc2626;">เฉลยแบบฝึกหัดระดับท้าทาย (Answer Key)</h1>
+            <div style="font-size: 13px; color: #475569;">เทคนิค 3 ขั้นตอน: สร้าง 3 ค่า (4 ข้อ) ➔ วาดบาร์ ➔ ประโยคสัญลักษณ์</div>
+        </div>
+        <div class="student-info" style="color: #dc2626; font-weight: bold;">
+            สำหรับครู / ผู้ปกครอง
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 1 -->
+    <div class="problem-card">
+        <div class="problem-title">1. แม่ค้ามีส้ม 52 ผล แม่ค้ามีส้มมากกว่าแตงโม 18 ผล แม่ค้ามีแตงโมกี่ผล</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="ans-line">1. ส้ม = 52</div>
+                <div class="ans-line">2. แตงโม = □</div>
+                <div class="ans-line">3. ส่วนต่าง = 18</div>
+                <div class="ans-line">4. ส้ม &gt; แตงโม</div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row"><div class="bar-label-ans">ส้ม</div><div class="bar-long">52</div></div>
+                    <div class="bar-row"><div class="bar-label-ans">แตงโม</div><div class="bar-short-group"><div class="bar-short">□</div><div class="bar-diff">18</div></div></div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="ans-line" style="margin-top: 6px;">52 - 18 = □</div>
+                <div class="ans-line" style="margin-top: 8px; color: #0f172a;">ตอบ: <span style="color: #dc2626;">34 ผล</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 2 -->
+    <div class="problem-card">
+        <div class="problem-title">2. ต้นกล้าออมเงินได้ 37 บาท ต้นกล้าออมได้น้อยกว่าใบเฟิร์น 26 บาท ใบเฟิร์นออมเงินได้กี่บาท</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="ans-line">1. ต้นกล้า = 37</div>
+                <div class="ans-line">2. ใบเฟิร์น = □</div>
+                <div class="ans-line">3. ส่วนต่าง = 26</div>
+                <div class="ans-line">4. ใบเฟิร์น &gt; ต้นกล้า</div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row"><div class="bar-label-ans">ใบเฟิร์น</div><div class="bar-long">□</div></div>
+                    <div class="bar-row"><div class="bar-label-ans">ต้นกล้า</div><div class="bar-short-group"><div class="bar-short">37</div><div class="bar-diff">26</div></div></div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="ans-line" style="margin-top: 6px;">37 + 26 = □</div>
+                <div class="ans-line" style="margin-top: 8px; color: #0f172a;">ตอบ: <span style="color: #dc2626;">63 บาท</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 3 -->
+    <div class="problem-card">
+        <div class="problem-title">3. ฟาร์มแห่งหนึ่งมีไก่ 84 ตัว มีไก่มากกว่าเป็ด 39 ตัว ฟาร์มแห่งนี้มีเป็ดกี่ตัว</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="ans-line">1. ไก่ = 84</div>
+                <div class="ans-line">2. เป็ด = □</div>
+                <div class="ans-line">3. ส่วนต่าง = 39</div>
+                <div class="ans-line">4. ไก่ &gt; เป็ด</div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row"><div class="bar-label-ans">ไก่</div><div class="bar-long">84</div></div>
+                    <div class="bar-row"><div class="bar-label-ans">เป็ด</div><div class="bar-short-group"><div class="bar-short">□</div><div class="bar-diff">39</div></div></div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="ans-line" style="margin-top: 6px;">84 - 39 = □</div>
+                <div class="ans-line" style="margin-top: 8px; color: #0f172a;">ตอบ: <span style="color: #dc2626;">45 ตัว</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 4 -->
+    <div class="problem-card">
+        <div class="problem-title">4. ห้อง ป.1/1 มีนักเรียน 48 คน มีนักเรียนน้อยกว่าห้อง ป.1/2 อยู่ 35 คน ห้อง ป.1/2 มีนักเรียนกี่คน</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="ans-line">1. ป.1/1 = 48</div>
+                <div class="ans-line">2. ป.1/2 = □</div>
+                <div class="ans-line">3. ส่วนต่าง = 35</div>
+                <div class="ans-line">4. ป.1/2 &gt; ป.1/1</div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row"><div class="bar-label-ans">ป.1/2</div><div class="bar-long">□</div></div>
+                    <div class="bar-row"><div class="bar-label-ans">ป.1/1</div><div class="bar-short-group"><div class="bar-short">48</div><div class="bar-diff">35</div></div></div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="ans-line" style="margin-top: 6px;">48 + 35 = □</div>
+                <div class="ans-line" style="margin-top: 8px; color: #0f172a;">ตอบ: <span style="color: #dc2626;">83 คน</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- เฉลยข้อที่ 5 -->
+    <div class="problem-card">
+        <div class="problem-title">5. พี่อ่านหนังสือได้ 91 หน้า พี่อ่านได้มากกว่าน้อง 47 หน้า น้องอ่านหนังสือได้กี่หน้า</div>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 1: สร้าง 3 ค่า (4 ข้อ)</div>
+                <div class="ans-line">1. พี่ = 91</div>
+                <div class="ans-line">2. น้อง = □</div>
+                <div class="ans-line">3. ส่วนต่าง = 47</div>
+                <div class="ans-line">4. พี่ &gt; น้อง</div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 2: สร้างบาร์ (Label จากข้อ 4)</div>
+                <div class="bar-area">
+                    <div class="bar-row"><div class="bar-label-ans">พี่</div><div class="bar-long">91</div></div>
+                    <div class="bar-row"><div class="bar-label-ans">น้อง</div><div class="bar-short-group"><div class="bar-short">□</div><div class="bar-diff">47</div></div></div>
+                </div>
+            </div>
+            <div class="step-box">
+                <div class="step-header">ขั้นที่ 3: ประโยคสัญลักษณ์</div>
+                <div class="ans-line" style="margin-top: 6px;">91 - 47 = □</div>
+                <div class="ans-line" style="margin-top: 8px; color: #0f172a;">ตอบ: <span style="color: #dc2626;">44 หน้า</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
